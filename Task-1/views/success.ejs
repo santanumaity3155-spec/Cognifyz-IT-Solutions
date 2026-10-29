@@ -1,0 +1,48 @@
+<%- include('./partials/head', { title: 'Registration Successful | Forma', activePage: 'home' }); -%>
+
+<%- include('./partials/nav', { activePage: 'home' }); -%>
+
+<main id="main-content" class="main" tabindex="-1">
+  <section class="success-section">
+    <div class="success-card">
+      <div class="success-icon">&#10004;</div>
+      <h2>Registration Successful!</h2>
+      <p class="success-message">Your student profile has been created. Welcome to Forma — Student Intelligence.</p>
+
+      <div class="student-summary">
+        <h3>Submitted Details</h3>
+        <table class="summary-table">
+          <tr>
+            <th>Full Name</th>
+            <td><%= student.fullName %></td>
+          </tr>
+          <tr>
+            <th>Email Address</th>
+            <td><%= student.email %></td>
+          </tr>
+          <tr>
+            <th>Course of Study</th>
+            <td><%= student.course %></td>
+          </tr>
+          <tr>
+            <th>Academic Year</th>
+            <td><%= student.academicYear %></td>
+          </tr>
+          <% if (student.phone) { %>
+          <tr>
+            <th>Phone Number</th>
+            <td><%= student.phone %></td>
+          </tr>
+          <% } %>
+        </table>
+      </div>
+
+      <div class="success-actions">
+        <a href="/" class="btn btn-outline">Register Another Student</a>
+        <a href="/students" class="btn btn-primary">View Student Records</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer'); -%>

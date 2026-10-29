@@ -1,0 +1,85 @@
+<%- include('./partials/head', { title: 'Register Student | Forma', activePage: 'home' }); -%>
+
+<%- include('./partials/nav', { activePage: 'home' }); -%>
+
+<main id="main-content" class="main" tabindex="-1">
+  <section class="registration-section">
+    <div class="registration-header">
+      <h2>Student Registration</h2>
+      <p>Join Forma — Student Intelligence. Create your academic profile in under a minute.</p>
+    </div>
+
+    <% if (errors && errors.length > 0) { %>
+      <div class="alert alert-error" role="alert">
+        <strong>Please fix the following errors:</strong>
+        <ul class="error-list">
+          <% errors.forEach(function(err) { %>
+            <li><%= err %></li>
+          <% }); %>
+        </ul>
+      </div>
+    <% } %>
+
+    <form action="/register" method="POST" class="registration-form" novalidate>
+      <div class="form-grid">
+        <div class="form-group">
+          <label for="fullName">Full Name <span class="required">*</span></label>
+          <input type="text" id="fullName" name="fullName" maxlength="100"
+            <% if (formData && formData.fullName) { %>value="<%= formData.fullName %>"<% } %>
+            placeholder="e.g. Alex Rivera" required autocomplete="name">
+          <span class="field-hint">Enter your full legal name as it appears on academic records.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="email">Email Address <span class="required">*</span></label>
+          <input type="email" id="email" name="email" maxlength="255"
+            <% if (formData && formData.email) { %>value="<%= formData.email %>"<% } %>
+            placeholder="alex.rivera@university.edu" required autocomplete="email">
+          <span class="field-hint">We'll use this for account-related communications.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="course">Course of Study <span class="required">*</span></label>
+          <select id="course" name="course" required>
+            <option value="" <% if (!formData || !formData.course) { %>selected<% } %> disabled>Select your course</option>
+            <% const courses = ['Computer Science', 'Data Science', 'Cybersecurity', 'Artificial Intelligence', 'Software Engineering', 'Information Technology']; %>
+            <% courses.forEach(function(c) { %>
+              <option value="<%= c %>" <% if (formData && formData.course === c) { %>selected<% } %>><%= c %></option>
+            <% }); %>
+          </select>
+          <span class="field-hint">Choose your primary academic program.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="academicYear">Academic Year <span class="required">*</span></label>
+          <select id="academicYear" name="academicYear" required>
+            <option value="" <% if (!formData || !formData.academicYear) { %>selected<% } %> disabled>Select your year</option>
+            <% [1, 2, 3, 4].forEach(function(y) { %>
+              <option value="<%= y %>" <% if (formData && formData.academicYear === String(y)) { %>selected<% } %>><%= y %></option>
+            <% }); %>
+          </select>
+          <span class="field-hint">Your current year of study.</span>
+        </div>
+
+        <div class="form-group">
+          <label for="phone">Phone Number (optional)</label>
+          <input type="tel" id="phone" name="phone" maxlength="20"
+            <% if (formData && formData.phone) { %>value="<%= formData.phone %>"<% } %>
+            placeholder="+1 (555) 000-0000" autocomplete="tel">
+          <span class="field-hint">Optional contact number for urgent notifications.</span>
+        </div>
+      </div>
+
+      <div class="form-actions">
+        <button type="submit" class="btn btn-primary btn-large">Register Student</button>
+        <a href="/students" class="btn btn-outline">View Student Records</a>
+      </div>
+    </form>
+
+    <div class="registration-footer">
+      <p>Already registered? <a href="/students">Browse student records &rarr;</a></p>
+    </div>
+  </section>
+</main>
+
+<%- include('./partials/footer'); -%>

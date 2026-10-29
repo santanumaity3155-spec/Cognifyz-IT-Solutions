@@ -1,0 +1,17 @@
+{
+  "name": "forma-student-intelligence",
+  "version": "1.0.0",
+  "description": "Cognifyz Full Stack Internship Task 1 — Forma Student Intelligence Platform",
+  "main": "app.js",
+  "scripts": {
+    "start": "node app.js",
+    "dev": "node app.js"
+  },
+  "dependencies": {
+    "express": "^4.19.2",
+    "ejs": "^3.1.10"
+  },
+  "keywords": ["express", "ejs", "student-management", "cognifyz"],
+  "author": "Cognifyz Intern",
+  "license": "MIT"
+}

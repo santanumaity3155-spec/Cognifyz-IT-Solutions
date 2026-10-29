@@ -1,0 +1,29 @@
+<aside class="sidebar" aria-label="Main navigation">
+  <div class="sidebar-brand">
+    <span class="brand-mark">F</span>
+    <span class="brand-name">Forma</span>
+    <span class="brand-tag">Student Intelligence</span>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/" class="nav-link <%= activePage === 'home' ? 'active' : '' %>" aria-current="<%= activePage === 'home' ? 'page' : undefined %>">
+      <span class="nav-icon">&#9733;</span>
+      <span class="nav-label">Register Student</span>
+    </a>
+    <a href="/students" class="nav-link <%= activePage === 'students' ? 'active' : '' %>" aria-current="<%= activePage === 'students' ? 'page' : undefined %>">
+      <span class="nav-icon">&#128197;</span>
+      <span class="nav-label">Student Records</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <p class="sidebar-note">In-memory storage &bull; Data resets on server restart</p>
+  </div>
+</aside>
+
+<header class="header" role="banner">
+  <button class="menu-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Toggle navigation menu">
+    <span class="menu-icon"></span>
+  </button>
+  <div class="header-content">
+    <h1 class="page-title"><%= title %></h1>
+  </div>
+</header>

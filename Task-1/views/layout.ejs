@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %></title>
+  <meta name="description" content="Forma — Student Intelligence Platform">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <aside class="sidebar" aria-label="Main navigation">
+    <div class="sidebar-brand">
+      <span class="brand-mark">F</span>
+      <span class="brand-name">Forma</span>
+      <span class="brand-tag">Student Intelligence</span>
+    </div>
+    <nav class="sidebar-nav">
+      <a href="/" class="nav-link <%= activePage === 'home' ? 'active' : '' %>" aria-current="<%= activePage === 'home' ? 'page' : undefined %>">
+        <span class="nav-icon">&#9733;</span>
+        <span class="nav-label">Register Student</span>
+      </a>
+      <a href="/students" class="nav-link <%= activePage === 'students' ? 'active' : '' %>" aria-current="<%= activePage === 'students' ? 'page' : undefined %>">
+        <span class="nav-icon">&#128197;</span>
+        <span class="nav-label">Student Records</span>
+      </a>
+    </nav>
+    <div class="sidebar-footer">
+      <p class="sidebar-note">In-memory storage &bull; Data resets on server restart</p>
+    </div>
+  </aside>
+
+  <header class="header" role="banner">
+    <button class="menu-toggle" aria-expanded="false" aria-controls="sidebar" aria-label="Toggle navigation menu">
+      <span class="menu-icon"></span>
+    </button>
+    <div class="header-content">
+      <h1 class="page-title"><%= title %></h1>
+    </div>
+  </header>
+
+  <main id="main-content" class="main" tabindex="-1">
+    <%- body %>
+  </main>
+
+  <footer class="footer" role="contentinfo">
+    <div class="footer-content">
+      <p class="footer-copy">&copy; 2026 Forma — Student Intelligence. Built for Cognifyz Full Stack Internship Task 1.</p>
+      <p class="footer-tech">Node.js &bull; Express.js &bull; EJS &bull; No database (in-memory storage)</p>
+    </div>
+  </footer>
+
+  <script src="/js/main.js"></script>
+</body>
+</html>

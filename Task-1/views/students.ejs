@@ -1,0 +1,54 @@
+<%- include('./partials/head', { title: 'Student Records | Forma', activePage: 'students' }); -%>
+
+<%- include('./partials/nav', { activePage: 'students' }); -%>
+
+<main id="main-content" class="main" tabindex="-1">
+  <% if (hasStudents && students.length > 0) { %>
+    <section class="students-section">
+      <div class="section-header">
+        <h2>Student Records</h2>
+        <p>Total registered students: <%= students.length %></p>
+      </div>
+
+      <div class="table-wrapper">
+        <table class="students-table">
+          <thead>
+            <tr>
+              <th>Full Name</th>
+              <th>Email</th>
+              <th>Course</th>
+              <th>Year</th>
+              <th>Registered</th>
+            </tr>
+          </thead>
+          <tbody>
+            <% students.forEach(function(s) { %>
+              <tr>
+                <td><%= s.fullName %></td>
+                <td><%= s.email %></td>
+                <td><%= s.course %></td>
+                <td><%= s.academicYear %></td>
+                <td><time><%= new Date(s.registeredAt).toLocaleString() %></time></td>
+              </tr>
+            <% }); %>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="section-footer">
+        <a href="/" class="btn btn-outline">Register Another Student</a>
+      </div>
+    </section>
+  <% } else { %>
+    <section class="empty-state">
+      <div class="empty-card">
+        <div class="empty-icon">&#128197;</div>
+        <h2>No Student Records Yet</h2>
+        <p>There are no registered students in the system. Be the first to register!</p>
+        <a href="/" class="btn btn-primary">Register a Student</a>
+      </div>
+    </section>
+  <% } %>
+</main>
+
+<%- include('./partials/footer'); -%>
