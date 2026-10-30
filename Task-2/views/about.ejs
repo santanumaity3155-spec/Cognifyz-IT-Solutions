@@ -1,0 +1,64 @@
+<!-- ABOUT PAGE -->
+<section class="about-section">
+  <div class="about-inner">
+    <h2>About Forma</h2>
+    <p>
+      <strong>Forma — Student Intelligence Platform</strong> is a premium
+      student management interface built for the Cognifyz IT Solutions Full
+      Stack Development Internship. This is the Task 2 deliverable.
+    </p>
+
+    <div class="about-grid">
+      <div class="about-card">
+        <h3>What it does</h3>
+        <p>
+          Register students with full academic details, validate every piece of
+          information on both the browser and the server, and browse searchable
+          student records. Every submitted record receives a registration
+          reference.
+        </p>
+      </div>
+      <div class="about-card">
+        <h3>Task 2 features</h3>
+        <ul class="feature-list">
+          <li>Extended registration form (9 fields including Terms and Conditions)</li>
+          <li>Real-time inline JavaScript validation</li>
+          <li>Express server-side validation (independent of the browser)</li>
+          <li>Preserved form values after validation errors</li>
+          <li>In-memory temporary storage</li>
+          <li>Student records with search and course filtering</li>
+          <li>Responsive dark SaaS-style interface</li>
+        </ul>
+      </div>
+      <div class="about-card">
+        <h3>Technology stack</h3>
+        <ul class="feature-list">
+          <li>Node.js</li>
+          <li>Express.js</li>
+          <li>EJS server-side rendering</li>
+          <li>HTML5, CSS3, Vanilla JavaScript</li>
+        </ul>
+      </div>
+      <div class="about-card">
+        <h3>Storage &amp; security</h3>
+        <ul class="feature-list">
+          <li>In-memory array (resets on server restart)</li>
+          <li>No MongoDB or external database</li>
+          <li>All output HTML-escaped in EJS templates</li>
+          <li>Allowlist validation for course, gender, and other fields</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="about-note">
+      <p><strong>Important:</strong> Student records are stored temporarily in
+      server memory only. Restarting the server clears all records. This is by
+      design for Task 2; a future task may integrate a persistent database.</p>
+    </div>
+
+    <div class="about-actions">
+      <a href="/" class="btn btn-outline">Register a Student</a>
+      <a href="/students" class="btn btn-primary">View Student Records</a>
+    </div>
+  </div>
+</section>

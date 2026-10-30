@@ -1,0 +1,177 @@
+<% function getError(errors, field) {
+  if (!errors) return null;
+  const found = errors.find(function (x) { return x.field === field; });
+  return found ? found.message : null;
+} %>
+<% function getValue(formData, field) {
+  return (formData && formData[field] != null) ? String(formData[field]) : '';
+} %>
+<% function isSelected(formData, field, value) {
+  return (formData && formData[field] == value) ? 'selected' : '';
+} %>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-inner">
+    <h2 class="hero-title">Forma<span class="hero-accent">.</span> Student Intelligence</h2>
+    <p class="hero-subtitle">
+      Register a new student and manage academic records in one secure platform.
+      Real-time inline validation, server-side verification on every submission,
+      and searchable student records — no database required.
+    </p>
+    <div class="hero-actions">
+      <a href="#registration" class="btn btn-primary">Register a Student</a>
+      <a href="/students" class="btn btn-outline">View Student Records</a>
+    </div>
+    <div class="hero-features">
+      <div class="feature"><span class="feature-icon">&#10003;</span><p>Real-time inline validation</p></div>
+      <div class="feature"><span class="feature-icon">&#128274;</span><p>Server-side verification on every submission</p></div>
+      <div class="feature"><span class="feature-icon">&#128197;</span><p>Searchable records with course filters</p></div>
+    </div>
+  </div>
+</section>
+
+<!-- REGISTRATION FORM -->
+<section id="registration" class="registration-section">
+  <div class="registration-header">
+    <h2>Student Registration</h2>
+    <p>Create your academic profile in under a minute. All fields are required.</p>
+  </div>
+
+  <% if (errors && errors.length > 0) { %>
+    <div class="alert alert-error" role="alert">
+      <strong>Please fix the following errors:</strong>
+      <ul class="error-list">
+        <% errors.forEach(function (err) { %>
+          <li><a href="#field-<%= err.field %>"><%= err.message %></a></li>
+        <% }); %>
+      </ul>
+    </div>
+  <% } %>
+  <% if (errors && errors.length > 0) { %>
+    <script id="server-errors" type="application/json"><%- JSON.stringify(errors) %></script>
+  <% } %>
+
+  <form action="/register" method="POST" class="registration-form" id="registrationForm" novalidate>
+    <div class="form-grid">
+
+      <!-- Full Name -->
+      <div class="form-group" id="field-fullName">
+        <label for="fullName">Full Name <span class="required">*</span></label>
+        <input type="text" id="fullName" name="fullName" maxlength="100"
+          value="<%= getValue(formData, 'fullName') %>" placeholder="e.g. Alex Rivera" autocomplete="name">
+        <span class="field-hint">Full legal name as it appears on academic records.</span>
+        <span class="field-error" id="error-fullName" role="alert"></span>
+        <span class="field-success" id="success-fullName" aria-hidden="true">&#10003;</span>
+        <span class="char-count" id="count-fullName"><span id="count-fullName-current">0</span>/100</span>
+      </div>
+
+      <!-- Email Address -->
+      <div class="form-group" id="field-email">
+        <label for="email">Email Address <span class="required">*</span></label>
+        <input type="email" id="email" name="email" maxlength="255"
+          value="<%= getValue(formData, 'email') %>" placeholder="alex.rivera@university.edu" autocomplete="email">
+        <span class="field-hint">We use this for account-related communications.</span>
+        <span class="field-error" id="error-email" role="alert"></span>
+        <span class="field-success" id="success-email" aria-hidden="true">&#10003;</span>
+      </div>
+
+      <!-- Phone Number -->
+      <div class="form-group" id="field-phone">
+        <label for="phone">Phone Number <span class="required">*</span></label>
+        <input type="tel" id="phone" name="phone" maxlength="20"
+          value="<%= getValue(formData, 'phone') %>" placeholder="+1 (555) 000-0000" autocomplete="tel">
+        <span class="field-hint">7–15 digits, optional leading +.</span>
+        <span class="field-error" id="error-phone" role="alert"></span>
+        <span class="field-success" id="success-phone" aria-hidden="true">&#10003;</span>
+      </div>
+
+      <!-- Student ID -->
+      <div class="form-group" id="field-studentId">
+        <label for="studentId">Student ID <span class="required">*</span></label>
+        <input type="text" id="studentId" name="studentId" maxlength="20"
+          value="<%= getValue(formData, 'studentId') %>" placeholder="e.g. STU-2024-0001" autocomplete="off">
+        <span class="field-hint">3–20 characters: letters, numbers, hyphens.</span>
+        <span class="field-error" id="error-studentId" role="alert"></span>
+        <span class="field-success" id="success-studentId" aria-hidden="true">&#10003;</span>
+      </div>
+
+      <!-- Course of Study -->
+      <div class="form-group" id="field-course">
+        <label for="course">Course of Study <span class="required">*</span></label>
+        <select id="course" name="course">
+          <option value="">Select your course</option>
+          <% courses.forEach(function (c) { %>
+            <option value="<%= c %>" <%= isSelected(formData, 'course', c) %>><%= c %></option>
+          <% }); %>
+        </select>
+        <span class="field-hint">Choose your primary academic program.</span>
+        <span class="field-error" id="error-course" role="alert"></span>
+        <span class="field-success" id="success-course" aria-hidden="true">&#10003;</span>
+      </div>
+
+      <!-- Gender -->
+      <div class="form-group" id="field-gender">
+        <label class="form-label">Gender <span class="required">*</span></label>
+        <div class="radio-group" role="radiogroup" aria-label="Gender">
+          <% genders.forEach(function (g) { %>
+            <label class="radio-label">
+              <input type="radio" name="gender" value="<%= g %>"
+                <%= isSelected(formData, 'gender', g) ? 'checked' : '' %>>
+              <span class="radio-text"><%= g %></span>
+            </label>
+          <% }); %>
+        </div>
+        <span class="field-error" id="error-gender" role="alert"></span>
+        <span class="field-success" id="success-gender" aria-hidden="true">&#10003;</span>
+      </div>
+
+      <!-- Date of Birth -->
+      <div class="form-group" id="field-dateOfBirth">
+        <label for="dateOfBirth">Date of Birth <span class="required">*</span></label>
+        <input type="date" id="dateOfBirth" name="dateOfBirth"
+          value="<%= getValue(formData, 'dateOfBirth') %>">
+        <span class="field-hint">You must be at least 10 years old.</span>
+        <span class="field-error" id="error-dateOfBirth" role="alert"></span>
+        <span class="field-success" id="success-dateOfBirth" aria-hidden="true">&#10003;</span>
+      </div>
+
+      <!-- Address -->
+      <div class="form-group full-width" id="field-address">
+        <label for="address">Address <span class="required">*</span></label>
+        <textarea id="address" name="address" maxlength="500" rows="3"
+          placeholder="Street, City, State, Postal Code"><%= getValue(formData, 'address') %></textarea>
+        <span class="field-hint">Street address, city, state, and postal code.</span>
+        <span class="field-error" id="error-address" role="alert"></span>
+        <span class="field-success" id="success-address" aria-hidden="true">&#10003;</span>
+        <span class="char-count" id="count-address"><span id="count-address-current">0</span>/500</span>
+      </div>
+
+      <!-- Terms and Conditions -->
+      <div class="form-group terms-group" id="field-terms">
+        <label class="checkbox-label" for="terms">
+          <input type="checkbox" id="terms" name="terms" value="on"
+            <%= formData && formData.terms ? 'checked' : '' %>>
+          <span class="checkbox-text">
+            I accept the <a href="/about" class="terms-link">Terms and Conditions</a>
+          </span>
+        </label>
+        <span class="field-error" id="error-terms" role="alert"></span>
+        <span class="field-success" id="success-terms" aria-hidden="true">&#10003;</span>
+      </div>
+
+    </div>
+
+    <div class="completion-card" id="completionCard">
+      <span class="completion-label">Form completion</span>
+      <span class="completion-value" id="completion-value">0</span>%
+      <div class="completion-bar"><div class="completion-bar-fill" id="completion-bar-fill"></div></div>
+    </div>
+
+    <div class="form-actions">
+      <button type="submit" id="submitBtn" class="btn btn-primary btn-large">Register Student</button>
+      <button type="button" id="resetBtn" class="btn btn-ghost">Reset Form</button>
+      <a href="/students" class="btn btn-outline">View Student Records</a>
+    </div>
+  </form>
+</section>

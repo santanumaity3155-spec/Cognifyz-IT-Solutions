@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/head', { title, activePage }) -%>
+<body class="page-<%= activePage || 'home' %>">
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <%- include('./partials/nav', { activePage }) -%>
+
+  <main id="main-content" class="main" tabindex="-1">
+    <% if (locals.message) { %>
+      <div class="alert alert-error" role="alert"><%= message %></div>
+    <% } %>
+    <%- body %>
+  </main>
+
+  <%- include('./partials/footer') -%>
+  <script src="/js/validation.js"></script>
+</body>
+</html>

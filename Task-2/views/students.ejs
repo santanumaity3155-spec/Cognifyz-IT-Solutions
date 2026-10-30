@@ -1,0 +1,74 @@
+<!-- STUDENT RECORDS -->
+<section class="students-section">
+  <div class="section-header">
+    <h2>Student Records</h2>
+    <p class="total-count">Total registered students: <strong><%= total %></strong></p>
+  </div>
+
+  <!-- Search + course filter (GET /students, processed server-side) -->
+  <form action="/students" method="GET" class="search-form">
+    <label for="search" class="visually-hidden">Search students by name, email, or student ID</label>
+    <input type="search" id="search" name="q" value="<%= query %>"
+      placeholder="Search students…" autocomplete="off">
+    <select name="course" id="filter-course">
+      <option value="">All courses</option>
+      <% courses.forEach(function (c) { %>
+        <option value="<%= c %>" <%= course === c ? 'selected' : '' %>><%= c %></option>
+      <% }); %>
+    </select>
+    <button type="submit" class="btn btn-primary">Filter</button>
+    <% if (query || course) { %>
+      <a href="/students" class="btn btn-ghost">Clear filters</a>
+    <% } %>
+  </form>
+
+  <% if (hasStudents) { %>
+    <div class="table-wrapper">
+      <table class="records-table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>Full Name</th>
+            <th>Student ID</th>
+            <th>Email Address</th>
+            <th>Course</th>
+            <th>Gender</th>
+            <th>Date of Birth</th>
+            <th>Registered</th>
+          </tr>
+        </thead>
+        <tbody>
+          <% students.forEach(function (s, index) { %>
+            <tr>
+              <td><%= index + 1 %></td>
+              <td><%= s.fullName %></td>
+              <td><%= s.studentId %></td>
+              <td><%= s.email %></td>
+              <td><%= s.course %></td>
+              <td><%= s.gender %></td>
+              <td><%= s.dateOfBirth %></td>
+              <td><time><%= new Date(s.registeredAt).toLocaleString() %></time></td>
+            </tr>
+          <% }); %>
+        </tbody>
+      </table>
+    </div>
+    <p class="count-note">
+      Showing <%= students.length %> of <%= total %> registered student<%= total !== 1 ? 's' : '' %>.
+    </p>
+  <% } else { %>
+    <section class="empty-state">
+      <div class="empty-card">
+        <div class="empty-icon">&#128197;</div>
+        <% if (query || course) { %>
+          <h2>No matching students</h2>
+          <p>No students match your current search or course filter.</p>
+        <% } else { %>
+          <h2>No Student Records Yet</h2>
+          <p>There are no registered students in the system. Be the first to register!</p>
+        <% } %>
+        <a href="/" class="btn btn-primary">Register a Student</a>
+      </div>
+    </section>
+  <% } %>
+</section>

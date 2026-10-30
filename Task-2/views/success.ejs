@@ -1,0 +1,36 @@
+<!-- SUCCESS PAGE -->
+<section class="success-section">
+  <div class="success-card">
+    <div class="success-icon">&#10004;</div>
+    <h2>Registration Successful!</h2>
+    <p class="success-message">
+      Welcome to Forma — Student Intelligence. Your student profile has been created.
+    </p>
+
+    <div class="reference-box">
+      <span class="reference-label">Registration Reference</span>
+      <span class="reference-value"><%= student.id %></span>
+      <p class="reference-note">Save this reference for your records.</p>
+    </div>
+
+    <div class="student-summary">
+      <h3>Submitted Details</h3>
+      <table class="summary-table">
+        <tr><th>Full Name</th><td><%= student.fullName %></td></tr>
+        <tr><th>Email Address</th><td><%= student.email %></td></tr>
+        <tr><th>Phone Number</th><td><%= student.phone %></td></tr>
+        <tr><th>Student ID</th><td><%= student.studentId %></td></tr>
+        <tr><th>Course of Study</th><td><%= student.course %></td></tr>
+        <tr><th>Gender</th><td><%= student.gender %></td></tr>
+        <tr><th>Date of Birth</th><td><%= student.dateOfBirth %></td></tr>
+        <tr><th>Address</th><td><%= student.address %></td></tr>
+        <tr><th>Registered At</th><td><time><%= new Date(student.registeredAt).toLocaleString() %></time></td></tr>
+      </table>
+    </div>
+
+    <div class="success-actions">
+      <a href="/" class="btn btn-outline">Register Another Student</a>
+      <a href="/students" class="btn btn-primary">View Student Records</a>
+    </div>
+  </div>
+</section>
