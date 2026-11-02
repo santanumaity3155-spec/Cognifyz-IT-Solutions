@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<%- include('./partials/head', { title, activePage }) -%>
+<body class="page-<%= activePage || 'home' %>">
+  <!-- Skip link for accessibility -->
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <%- include('./partials/nav', { activePage }) -%>
+
+  <main id="main-content" class="main" tabindex="-1">
+    <% if (locals.message) { %>
+      <div class="alert alert-danger text-center" role="alert"><%= message %></div>
+    <% } %>
+    <%- body %>
+  </main>
+
+  <%- include('./partials/footer') -%>
+
+  <!-- Bootstrap 5.3 Bundle with Popper -->
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" crossorigin="anonymous"></script>
+  <!-- Page-specific interactions (scroll animations, Bootstrap init) -->
+  <script src="/js/main.js"></script>
+  <!-- Form validation (handles registration form only) -->
+  <script src="/js/validation.js"></script>
+</body>
+</html>

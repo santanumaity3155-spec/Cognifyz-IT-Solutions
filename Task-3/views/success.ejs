@@ -1,0 +1,44 @@
+<!-- ========== SUCCESS PAGE ========== -->
+<section class="success-section section py-5">
+  <div class="container">
+    <div class="row justify-content-center">
+      <div class="col-lg-6 animate-fade-in-up">
+        <div class="card border-0 shadow-lg forma-card">
+          <div class="card-body p-5 text-center">
+            <div class="success-icon mb-4">&#10004;</div>
+            <h2 class="fw-bold mb-3">Registration Successful!</h2>
+            <p class="text-muted mb-4">
+              Welcome to Forma — Student Intelligence. Your student profile has been created.
+            </p>
+
+            <div class="reference-box mb-4 p-4 rounded-4 bg-light border border-secondary">
+              <span class="d-block text-muted small fw-semibold">Registration Reference</span>
+              <span class="d-block fw-bold text-navy fs-4"><%= student.id %></span>
+              <p class="text-muted small mt-2 mb-0">Save this reference for your records.</p>
+            </div>
+
+            <div class="student-summary text-start mb-4">
+              <h6 class="fw-bold mb-3 text-navy">Submitted Details</h6>
+              <table class="summary-table table border-0 w-100">
+                <tr><th class="text-muted small" width="40%">Full Name</th><td><%= student.fullName %></td></tr>
+                <tr><th class="text-muted small" width="40%">Email Address</th><td><%= student.email %></td></tr>
+                <tr><th class="text-muted small" width="40%">Phone Number</th><td><%= student.phone %></td></tr>
+                <tr><th class="text-muted small" width="40%">Student ID</th><td><%= student.studentId %></td></tr>
+                <tr><th class="text-muted small" width="40%">Course of Study</th><td><%= student.course %></td></tr>
+                <tr><th class="text-muted small" width="40%">Gender</th><td><%= student.gender %></td></tr>
+                <tr><th class="text-muted small" width="40%">Date of Birth</th><td><%= student.dateOfBirth %></td></tr>
+                <tr><th class="text-muted small" width="40%">Address</th><td><%= student.address %></td></tr>
+                <tr><th class="text-muted small" width="40%">Registered At</th><td><time><%= new Date(student.registeredAt).toLocaleString() %></time></td></tr>
+              </table>
+            </div>
+
+            <div class="success-actions d-flex gap-3 justify-content-center">
+              <a href="/" class="btn btn-outline-secondary px-4 py-3">Register Another Student</a>
+              <a href="/students" class="btn btn-primary px-4 py-3 shadow-sm">View Student Records</a>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

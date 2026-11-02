@@ -1,0 +1,77 @@
+<!-- Navbar: Bootstrap 5 responsive navbar with desktop sidebar behavior -->
+<nav class="navbar navbar-expand-lg navbar-dark forma-navbar fixed-top" aria-label="Main navigation">
+  <div class="container-fluid">
+    <a class="navbar-brand d-flex align-items-center" href="/" aria-label="Forma — Student Intelligence home">
+      <span class="brand-mark me-2">F</span>
+      <span class="brand-name">Forma</span>
+    </a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#formaNavbar"
+            aria-controls="formaNavbar" aria-expanded="false" aria-label="Toggle navigation">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="formaNavbar">
+      <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+        <li class="nav-item">
+          <a class="nav-link <%= activePage === 'home' ? 'active' : '' %>" href="/" aria-current="<%= activePage === 'home' ? 'page' : undefined %>">
+            <span class="nav-icon">&#128203;</span> Dashboard
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= activePage === 'home' ? 'active' : '' %>" href="/#registration" aria-current="<%= activePage === 'home' ? 'page' : undefined %>">
+            <span class="nav-icon">&#9998;</span> Registration
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= activePage === 'students' ? 'active' : '' %>" href="/students" aria-current="<%= activePage === 'students' ? 'page' : undefined %>">
+            <span class="nav-icon">&#128197;</span> Student Records
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= activePage === 'about' ? 'active' : '' %>" href="/about" aria-current="<%= activePage === 'about' ? 'page' : undefined %>">
+            <span class="nav-icon">&#8505;</span> About
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link <%= activePage === 'contact' ? 'active' : '' %>" href="/contact" aria-current="<%= activePage === 'contact' ? 'page' : undefined %>">
+            <span class="nav-icon">&#9993;</span> Contact
+          </a>
+        </li>
+      </ul>
+      <div class="d-flex">
+        <a href="/students" class="btn forma-btn-sm btn-outline-light text-white ms-2">View Records</a>
+        <a href="/#registration" class="btn forma-btn-sm btn-primary ms-2">Register Student</a>
+      </div>
+    </div>
+  </div>
+</nav>
+
+<!-- Desktop sidebar (hidden on mobile, shown on lg+) -->
+<aside class="sidebar d-none d-lg-block" aria-label="Desktop navigation">
+  <div class="sidebar-brand">
+    <a href="/" aria-label="Forma — Student Intelligence home">
+      <span class="brand-mark">F</span>
+      <span class="brand-name">Forma</span>
+      <span class="brand-tag">Student Intelligence</span>
+    </a>
+  </div>
+  <nav class="sidebar-nav">
+    <a href="/" class="nav-link <%= activePage === 'home' ? 'active' : '' %>" aria-current="<%= activePage === 'home' ? 'page' : undefined %>">
+      <span class="nav-icon">&#128203;</span><span class="nav-label">Dashboard</span>
+    </a>
+    <a href="/#registration" class="nav-link <%= activePage === 'home' ? 'active' : '' %>" aria-current="<%= activePage === 'home' ? 'page' : undefined %>">
+      <span class="nav-icon">&#9998;</span><span class="nav-label">Registration</span>
+    </a>
+    <a href="/students" class="nav-link <%= activePage === 'students' ? 'active' : '' %>" aria-current="<%= activePage === 'students' ? 'page' : undefined %>">
+      <span class="nav-icon">&#128197;</span><span class="nav-label">Student Records</span>
+    </a>
+    <a href="/about" class="nav-link <%= activePage === 'about' ? 'active' : '' %>" aria-current="<%= activePage === 'about' ? 'page' : undefined %>">
+      <span class="nav-icon">&#8505;</span><span class="nav-label">About</span>
+    </a>
+    <a href="/contact" class="nav-link <%= activePage === 'contact' ? 'active' : '' %>" aria-current="<%= activePage === 'contact' ? 'page' : undefined %>">
+      <span class="nav-icon">&#9993;</span><span class="nav-label">Contact</span>
+    </a>
+  </nav>
+  <div class="sidebar-footer">
+    <p class="sidebar-note">Temporary in-memory storage &bull; Data resets on server restart</p>
+  </div>
+</aside>
