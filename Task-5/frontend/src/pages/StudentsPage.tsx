@@ -4,7 +4,7 @@ import { Plus, Users } from 'lucide-react';
 import { StudentFilterBar } from '../components/students/StudentFilterBar';
 import { StudentTable } from '../components/students/StudentTable';
 import { Button } from '../components/common/Button';
-import { Student, StudentFilterOptions } from '../../types/student';
+import { Student, StudentFilterOptions } from '../types/student';
 
 // Initial preview dataset representing the 10 seed students (scaffolded for Phase 6)
 const initialScaffoldStudents: Student[] = [
