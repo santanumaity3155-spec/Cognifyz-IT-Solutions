@@ -100,3 +100,4 @@ export const StudentFilterBar: React.FC<StudentFilterBarProps> = ({
     </div>
   );
 };
+

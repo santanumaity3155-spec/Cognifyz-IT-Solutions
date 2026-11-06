@@ -33,3 +33,4 @@ export const Badge: React.FC<BadgeProps> = ({ status, size = 'md' }) => {
     </span>
   );
 };
+

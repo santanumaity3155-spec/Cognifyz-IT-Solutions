@@ -79,3 +79,4 @@ export interface ApiResponse<T> {
   error?: string;
   errors?: Array<{ field: string; message: string }>;
 }
+

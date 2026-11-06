@@ -135,3 +135,4 @@ export const StudentTable: React.FC<StudentTableProps> = ({
     </div>
   );
 };
+
