@@ -7,7 +7,10 @@ export const useTheme = () => {
     if (typeof window !== 'undefined') {
       const stored = localStorage.getItem('forma_theme') as Theme;
       if (stored) return stored;
-      return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      if (typeof window.matchMedia === 'function') {
+        return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      }
+      return 'light';
     }
     return 'light';
   });
