@@ -34,6 +34,9 @@ app.use(cookieParser(env.COOKIE_SECRET));
 // Health Check API Route
 app.use('/api/health', healthRoutes);
 
+// Authentication API Routes (Phase 5)
+app.use('/api/auth', authRoutes);
+
 // 404 Handler for undefined API routes
 app.use('/api/*', (req, res) => {
   res.status(404).json({
