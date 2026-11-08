@@ -1,20 +1,35 @@
 import React from 'react';
-import { Settings as SettingsIcon, Sun, Moon, Server, Database, ShieldCheck } from 'lucide-react';
+import { Settings as SettingsIcon, Sun, Moon, Server, Database, ShieldCheck, RefreshCw } from 'lucide-react';
 import { useTheme } from '../hooks/useTheme';
+import { useHealth } from '../hooks/useHealth';
+import { Button } from '../components/common/Button';
 
 export const SettingsPage: React.FC = () => {
   const { isDark, toggleTheme } = useTheme();
+  const { health, isOnline, isLoading, checkHealth } = useHealth();
 
   return (
     <div className="max-w-4xl space-y-6">
-      <div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
-          <SettingsIcon className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
-          <span>Platform Settings</span>
-        </h1>
-        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          System configuration, visual theme preferences, and backend connection details
-        </p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight flex items-center gap-2.5">
+            <SettingsIcon className="w-7 h-7 text-indigo-600 dark:text-indigo-400" />
+            <span>Platform Settings</span>
+          </h1>
+          <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            System configuration, visual theme preferences, and backend connection details
+          </p>
+        </div>
+
+        <Button
+          size="sm"
+          variant="outline"
+          icon={RefreshCw}
+          isLoading={isLoading}
+          onClick={checkHealth}
+        >
+          Check Connection
+        </Button>
       </div>
 
       {/* Visual Theme Section */}
@@ -53,25 +68,38 @@ export const SettingsPage: React.FC = () => {
         </div>
       </div>
 
-      {/* API Configuration Overview */}
+      {/* API Configuration & Live Status Overview */}
       <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-4">
-        <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
-          <Server className="w-4 h-4 text-indigo-500" />
-          <span>REST API Service Information</span>
-        </h3>
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+            <Server className="w-4 h-4 text-indigo-500" />
+            <span>REST API Service Status</span>
+          </h3>
+
+          <span
+            className={`inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${
+              isOnline
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800'
+                : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800'
+            }`}
+          >
+            <span className="w-2 h-2 rounded-full bg-current animate-pulse" />
+            {isOnline ? 'Connected' : 'Offline'}
+          </span>
+        </div>
 
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-xs">
           <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
             <span className="text-slate-400 block text-[11px] font-semibold uppercase">Backend Base URL</span>
             <span className="font-mono font-medium text-slate-800 dark:text-slate-200 mt-1 block">
-              http://localhost:5000/api
+              {import.meta.env.VITE_API_URL || 'http://localhost:5000/api'}
             </span>
           </div>
 
           <div className="p-3.5 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-100 dark:border-slate-800">
-            <span className="text-slate-400 block text-[11px] font-semibold uppercase">CORS Allowed Origin</span>
-            <span className="font-mono font-medium text-slate-800 dark:text-slate-200 mt-1 block">
-              http://localhost:5173
+            <span className="text-slate-400 block text-[11px] font-semibold uppercase">Uptime & Environment</span>
+            <span className="font-medium text-slate-800 dark:text-slate-200 mt-1 block">
+              {health ? `${health.uptime} • ${health.environment}` : 'Waiting for connection...'}
             </span>
           </div>
 
@@ -79,7 +107,9 @@ export const SettingsPage: React.FC = () => {
             <span className="text-slate-400 block text-[11px] font-semibold uppercase">Storage Architecture</span>
             <span className="font-medium text-slate-800 dark:text-slate-200 mt-1 block flex items-center gap-1.5">
               <Database className="w-3.5 h-3.5 text-emerald-500" />
-              <span>MongoDB Mongoose + In-Memory Fallback</span>
+              <span>
+                {health?.database?.statusMessage || 'MongoDB Mongoose + In-Memory Fallback'}
+              </span>
             </span>
           </div>
 
@@ -95,4 +125,3 @@ export const SettingsPage: React.FC = () => {
     </div>
   );
 };
-

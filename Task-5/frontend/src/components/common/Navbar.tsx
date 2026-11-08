@@ -1,7 +1,8 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
-import { Menu, Sun, Moon, Plus, Activity } from 'lucide-react';
+import { Menu, Sun, Moon, Plus, Activity, AlertCircle } from 'lucide-react';
 import { useTheme } from '../../hooks/useTheme';
+import { useHealth } from '../../hooks/useHealth';
 
 interface NavbarProps {
   onToggleSidebar: () => void;
@@ -9,6 +10,7 @@ interface NavbarProps {
 
 export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
   const { isDark, toggleTheme } = useTheme();
+  const { isOnline, isLoading } = useHealth();
 
   return (
     <header className="sticky top-0 z-30 h-16 bg-white/90 dark:bg-slate-900/90 backdrop-blur-md border-b border-slate-200/80 dark:border-slate-800 transition-colors">
@@ -30,12 +32,24 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
           </div>
         </div>
 
-        {/* Right: Quick actions, API status & theme toggle */}
+        {/* Right: Quick actions, Live API status & theme toggle */}
         <div className="flex items-center gap-2.5">
-          {/* Server API Status Pill */}
-          <div className="hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium bg-emerald-50 text-emerald-700 border border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/60">
-            <Activity className="w-3.5 h-3.5 animate-pulse text-emerald-600" />
-            <span>API Server Online</span>
+          {/* Dynamic Server API Status Pill */}
+          <div
+            className={`hidden sm:inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-medium border transition-colors ${
+              isLoading
+                ? 'bg-slate-50 text-slate-500 border-slate-200 dark:bg-slate-800 dark:text-slate-400 dark:border-slate-700'
+                : isOnline
+                ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/40 dark:text-emerald-400 dark:border-emerald-800/60'
+                : 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/40 dark:text-rose-400 dark:border-rose-800/60'
+            }`}
+          >
+            {isOnline ? (
+              <Activity className="w-3.5 h-3.5 animate-pulse text-emerald-600 dark:text-emerald-400" />
+            ) : (
+              <AlertCircle className="w-3.5 h-3.5 text-rose-600 dark:text-rose-400" />
+            )}
+            <span>{isLoading ? 'Checking API...' : isOnline ? 'API Server Online' : 'API Disconnected'}</span>
           </div>
 
           {/* Quick Add Student Button */}
@@ -61,4 +75,3 @@ export const Navbar: React.FC<NavbarProps> = ({ onToggleSidebar }) => {
     </header>
   );
 };
-

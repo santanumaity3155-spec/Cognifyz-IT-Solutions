@@ -8,137 +8,141 @@ import {
   ArrowRight,
   TrendingUp,
   GraduationCap,
-  Sparkles,
+  RefreshCw,
+  Eye,
 } from 'lucide-react';
 import { StatCard } from '../components/common/StatCard';
 import { Button } from '../components/common/Button';
 import { Badge } from '../components/common/Badge';
+import { ErrorBanner } from '../components/common/ErrorBanner';
+import { useDashboard } from '../hooks/useDashboard';
 
 export const DashboardPage: React.FC = () => {
-  // Demonstration preview dataset prepared for Phase 7 API connection
-  const sampleMetrics = {
-    totalStudents: 10,
-    activeStudents: 7,
-    pendingStudents: 2,
-    totalCourses: 5,
-  };
+  const { stats, isLoading, error, refetch } = useDashboard();
 
-  const sampleCourses = [
-    { course: 'Computer Science', count: 3, percentage: 30 },
-    { course: 'Data Science', count: 2, percentage: 20 },
-    { course: 'Information Technology', count: 2, percentage: 20 },
-    { course: 'Electronics', count: 2, percentage: 20 },
-    { course: 'Mechanical', count: 1, percentage: 10 },
-  ];
-
-  const sampleYears = [
-    { academicYear: '1st Year', count: 2, percentage: 20 },
-    { academicYear: '2nd Year', count: 2, percentage: 20 },
-    { academicYear: '3rd Year', count: 3, percentage: 30 },
-    { academicYear: '4th Year', count: 3, percentage: 30 },
-  ];
-
-  const recentPreview = [
-    {
-      studentId: 'STU-2026-010',
-      fullName: 'Zoe Washington',
-      course: 'Computer Science',
-      date: 'Feb 10, 2026',
-      status: 'Active',
-    },
-    {
-      studentId: 'STU-2026-009',
-      fullName: 'Carlos Mendez',
-      course: 'Electronics',
-      date: 'Feb 08, 2026',
-      status: 'Suspended',
-    },
-    {
-      studentId: 'STU-2026-008',
-      fullName: 'Ananya Patel',
-      course: 'Data Science',
-      date: 'Feb 05, 2026',
-      status: 'Graduated',
-    },
-    {
-      studentId: 'STU-2026-007',
-      fullName: "David O'Connor",
-      course: 'Information Technology',
-      date: 'Feb 03, 2026',
-      status: 'Pending',
-    },
-    {
-      studentId: 'STU-2026-006',
-      fullName: 'Sarah Jenkins',
-      course: 'Computer Science',
-      date: 'Feb 01, 2026',
-      status: 'Active',
-    },
-  ];
-
-  return (
-    <div className="space-y-6">
-      {/* Top Banner Notice */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 bg-indigo-50/70 dark:bg-indigo-950/30 border border-indigo-200/60 dark:border-indigo-800/60 rounded-2xl p-4">
-        <div className="flex items-center gap-3">
-          <div className="p-2 rounded-xl bg-indigo-600 text-white shrink-0">
-            <Sparkles className="w-4 h-4" />
+  // Skeleton loading view
+  if (isLoading) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
+          <div className="space-y-2">
+            <div className="h-8 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse w-72" />
+            <div className="h-4 bg-slate-100 dark:bg-slate-800 rounded-lg animate-pulse w-48" />
           </div>
+          <div className="h-9 bg-slate-100 dark:bg-slate-800 rounded-xl animate-pulse w-28" />
+        </div>
+
+        {/* 4 Cards Skeleton */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {[1, 2, 3, 4].map((i) => (
+            <div
+              key={i}
+              className="h-28 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-5 animate-pulse"
+            />
+          ))}
+        </div>
+
+        {/* Distribution Grids Skeleton */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="h-64 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 animate-pulse" />
+          <div className="h-64 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 animate-pulse" />
+        </div>
+
+        {/* Recent Table Skeleton */}
+        <div className="h-64 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 animate-pulse" />
+      </div>
+    );
+  }
+
+  // Error Banner State with Retry
+  if (error || !stats) {
+    return (
+      <div className="space-y-6">
+        <div className="flex items-center justify-between">
           <div>
-            <h4 className="text-xs font-bold text-slate-900 dark:text-white">
-              Phase 6 UI Routing Scaffold Initialized
-            </h4>
-            <p className="text-[11px] text-slate-500 dark:text-slate-400">
-              Visual dashboard components mounted. Real-time Axios backend fetching connects in Phase 7.
+            <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+              Executive Intelligence Dashboard
+            </h1>
+            <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">
+              High-level institutional statistics and student distribution analytics
             </p>
           </div>
         </div>
 
-        <Link to="/students">
-          <Button size="sm" icon={ArrowRight} iconPosition="right">
-            Manage Students
-          </Button>
-        </Link>
+        <ErrorBanner
+          message={error?.message || 'Failed to connect to the backend stats service.'}
+          onRetry={refetch}
+          isRetrying={isLoading}
+        />
       </div>
+    );
+  }
 
-      {/* Page Title */}
-      <div>
-        <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
-          Executive Intelligence Dashboard
-        </h1>
-        <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">
-          High-level institutional statistics and student distribution analytics
-        </p>
+  const activeRatio = stats.totalStudents > 0
+    ? `${Math.round((stats.activeStudents / stats.totalStudents) * 100)}% active`
+    : '0% active';
+
+  return (
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <h1 className="text-2xl md:text-3xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+            Executive Intelligence Dashboard
+          </h1>
+          <p className="text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1">
+            Real-time analytics fetched directly from the Express REST API
+          </p>
+        </div>
+
+        <div className="flex items-center gap-2.5">
+          <Button
+            size="sm"
+            variant="outline"
+            icon={RefreshCw}
+            isLoading={isLoading}
+            onClick={() => refetch()}
+            title="Refresh statistics from server"
+          >
+            Refresh Data
+          </Button>
+
+          <Link to="/students">
+            <Button size="sm" icon={ArrowRight} iconPosition="right">
+              Manage Students
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* 4 Metric Cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <StatCard
           title="Total Students"
-          value={sampleMetrics.totalStudents}
+          value={stats.totalStudents}
           subtitle="Enrolled institutional records"
           icon={Users}
-          trend={{ value: '+12% this term', isPositive: true }}
+          trend={{ value: `${stats.totalStudents} total`, isPositive: true }}
         />
         <StatCard
           title="Active Students"
-          value={sampleMetrics.activeStudents}
+          value={stats.activeStudents}
           subtitle="Currently active attendance"
           icon={UserCheck}
           iconColor="text-emerald-600 bg-emerald-50 dark:bg-emerald-950/60 dark:text-emerald-400"
-          trend={{ value: '70% ratio', isPositive: true }}
+          trend={{ value: activeRatio, isPositive: true }}
         />
         <StatCard
           title="Pending Registrations"
-          value={sampleMetrics.pendingStudents}
+          value={stats.pendingStudents}
           subtitle="Awaiting document verification"
           icon={Clock}
           iconColor="text-amber-600 bg-amber-50 dark:bg-amber-950/60 dark:text-amber-400"
         />
         <StatCard
           title="Offered Courses"
-          value={sampleMetrics.totalCourses}
-          subtitle="Engineering & Science branches"
+          value={stats.totalCourses}
+          subtitle="Distinct active departments"
           icon={BookOpen}
           iconColor="text-blue-600 bg-blue-50 dark:bg-blue-950/60 dark:text-blue-400"
         />
@@ -146,12 +150,12 @@ export const DashboardPage: React.FC = () => {
 
       {/* Distributions Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Course Distribution */}
+        {/* Course-Wise Student Distribution */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
               <h3 className="text-sm font-bold text-slate-900 dark:text-white">
-                Course Distribution
+                Course-Wise Student Distribution
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
                 Enrollment breakdown by department
@@ -161,28 +165,34 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div className="space-y-3 pt-2">
-            {sampleCourses.map((item) => (
-              <div key={item.course} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
-                    {item.course}
-                  </span>
-                  <span className="text-slate-500 dark:text-slate-400 font-semibold">
-                    {item.count} ({item.percentage}%)
-                  </span>
+            {stats.courseDistribution && stats.courseDistribution.length > 0 ? (
+              stats.courseDistribution.map((item) => (
+                <div key={item.course} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {item.course}
+                    </span>
+                    <span className="text-slate-500 dark:text-slate-400 font-semibold">
+                      {item.count} student{item.count === 1 ? '' : 's'} ({item.percentage}%)
+                    </span>
+                  </div>
+                  <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-indigo-600 dark:bg-indigo-500 rounded-full transition-all duration-500"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-indigo-600 dark:bg-indigo-500 rounded-full transition-all duration-500"
-                    style={{ width: `${item.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-xs text-slate-400 py-6 text-center italic">
+                No course enrollment data available.
+              </p>
+            )}
           </div>
         </div>
 
-        {/* Academic Year Split */}
+        {/* Academic Year Distribution */}
         <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200/80 dark:border-slate-800 p-6 shadow-sm space-y-4">
           <div className="flex items-center justify-between">
             <div>
@@ -190,31 +200,37 @@ export const DashboardPage: React.FC = () => {
                 Academic Year Breakdown
               </h3>
               <p className="text-xs text-slate-500 dark:text-slate-400">
-                Cohorts across undergraduate progression
+                Cohorts across undergraduate and postgraduate progression
               </p>
             </div>
             <GraduationCap className="w-4 h-4 text-slate-400" />
           </div>
 
           <div className="space-y-3 pt-2">
-            {sampleYears.map((item) => (
-              <div key={item.academicYear} className="space-y-1">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-medium text-slate-700 dark:text-slate-300">
-                    {item.academicYear}
-                  </span>
-                  <span className="text-slate-500 dark:text-slate-400 font-semibold">
-                    {item.count} ({item.percentage}%)
-                  </span>
+            {stats.academicYearDistribution && stats.academicYearDistribution.length > 0 ? (
+              stats.academicYearDistribution.map((item) => (
+                <div key={item.academicYear} className="space-y-1">
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-medium text-slate-700 dark:text-slate-300">
+                      {item.academicYear}
+                    </span>
+                    <span className="text-slate-500 dark:text-slate-400 font-semibold">
+                      {item.count} student{item.count === 1 ? '' : 's'} ({item.percentage}%)
+                    </span>
+                  </div>
+                  <div className="w-full h-2.5 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                    <div
+                      className="h-full bg-emerald-500 dark:bg-emerald-400 rounded-full transition-all duration-500"
+                      style={{ width: `${item.percentage}%` }}
+                    />
+                  </div>
                 </div>
-                <div className="w-full h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                  <div
-                    className="h-full bg-emerald-500 dark:bg-emerald-400 rounded-full transition-all duration-500"
-                    style={{ width: `${item.percentage}%` }}
-                  />
-                </div>
-              </div>
-            ))}
+              ))
+            ) : (
+              <p className="text-xs text-slate-400 py-6 text-center italic">
+                No academic year distribution data available.
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -227,14 +243,14 @@ export const DashboardPage: React.FC = () => {
               Recent Student Registrations
             </h3>
             <p className="text-xs text-slate-500 dark:text-slate-400">
-              Latest 5 additions to the institutional registry
+              Latest additions to the institutional registry fetched live from backend
             </p>
           </div>
           <Link
             to="/students"
             className="text-xs font-semibold text-indigo-600 dark:text-indigo-400 hover:underline flex items-center gap-1"
           >
-            <span>View All</span>
+            <span>View All Directory</span>
             <ArrowRight className="w-3.5 h-3.5" />
           </Link>
         </div>
@@ -244,32 +260,57 @@ export const DashboardPage: React.FC = () => {
             <thead>
               <tr className="border-b border-slate-100 dark:border-slate-800 text-slate-400 font-bold uppercase tracking-wider">
                 <th className="py-2.5 px-3">Student ID</th>
-                <th className="py-2.5 px-3">Student Name</th>
+                <th className="py-2.5 px-3">Name & Email</th>
                 <th className="py-2.5 px-3">Course</th>
                 <th className="py-2.5 px-3">Registered On</th>
                 <th className="py-2.5 px-3 text-right">Status</th>
+                <th className="py-2.5 px-3 text-right">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
-              {recentPreview.map((item) => (
-                <tr key={item.studentId} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40">
-                  <td className="py-3 px-3 font-mono font-semibold text-indigo-600 dark:text-indigo-400">
-                    {item.studentId}
-                  </td>
-                  <td className="py-3 px-3 font-semibold text-slate-800 dark:text-slate-200">
-                    {item.fullName}
-                  </td>
-                  <td className="py-3 px-3 text-slate-600 dark:text-slate-400">
-                    {item.course}
-                  </td>
-                  <td className="py-3 px-3 text-slate-500 dark:text-slate-400">
-                    {item.date}
-                  </td>
-                  <td className="py-3 px-3 text-right">
-                    <Badge status={item.status} size="sm" />
+              {stats.recentStudents && stats.recentStudents.length > 0 ? (
+                stats.recentStudents.map((item) => (
+                  <tr key={item.studentId || item._id} className="hover:bg-slate-50/50 dark:hover:bg-slate-800/40 transition-colors">
+                    <td className="py-3 px-3 font-mono font-semibold text-indigo-600 dark:text-indigo-400">
+                      <Link to={`/students/${item.studentId || item._id}`} className="hover:underline">
+                        {item.studentId}
+                      </Link>
+                    </td>
+                    <td className="py-3 px-3">
+                      <div className="font-semibold text-slate-800 dark:text-slate-200">
+                        {item.fullName}
+                      </div>
+                      <div className="text-[11px] text-slate-400">
+                        {item.email}
+                      </div>
+                    </td>
+                    <td className="py-3 px-3 text-slate-600 dark:text-slate-300 font-medium">
+                      {item.course}
+                    </td>
+                    <td className="py-3 px-3 text-slate-500 dark:text-slate-400">
+                      {new Date(item.createdAt).toLocaleDateString()}
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <Badge status={item.registrationStatus} size="sm" />
+                    </td>
+                    <td className="py-3 px-3 text-right">
+                      <Link
+                        to={`/students/${item.studentId || item._id}`}
+                        className="inline-flex items-center gap-1 text-[11px] font-medium text-indigo-600 dark:text-indigo-400 hover:underline"
+                      >
+                        <Eye className="w-3.5 h-3.5" />
+                        <span>View</span>
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="py-8 text-center text-slate-400 italic">
+                    No recent student registrations found.
                   </td>
                 </tr>
-              ))}
+              )}
             </tbody>
           </table>
         </div>
@@ -277,4 +318,3 @@ export const DashboardPage: React.FC = () => {
     </div>
   );
 };
-
