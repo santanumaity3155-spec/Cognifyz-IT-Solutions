@@ -1,6 +1,6 @@
 import React from 'react';
 import { NavLink } from 'react-router-dom';
-import { Github, ShieldCheck, Cpu, Layers, ArrowRight, CheckCircle2 } from 'lucide-react';
+import { Github, ShieldCheck, Cpu, Layers, ArrowRight } from 'lucide-react';
 import Button from '../components/common/Button.tsx';
 import Badge from '../components/common/Badge.tsx';
 

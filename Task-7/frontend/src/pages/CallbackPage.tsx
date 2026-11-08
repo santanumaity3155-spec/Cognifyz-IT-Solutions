@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import { CheckCircle2, AlertTriangle, ArrowRight, Github, Loader2 } from 'lucide-react';
+import { CheckCircle2, AlertTriangle, ArrowRight, Loader2 } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.tsx';
 import Card from '../components/common/Card.tsx';
 import Button from '../components/common/Button.tsx';

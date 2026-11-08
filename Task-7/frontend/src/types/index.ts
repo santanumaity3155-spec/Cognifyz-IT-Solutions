@@ -36,3 +36,4 @@ export interface AuthContextType {
   refreshGitHubStatus: () => Promise<void>;
   disconnectGitHub: () => Promise<void>;
 }
+

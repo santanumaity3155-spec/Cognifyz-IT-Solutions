@@ -1,9 +1,8 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Activity, Server, Database, ShieldCheck, RotateCcw, Clock, Layers } from 'lucide-react';
+import { Server, Database, ShieldCheck, RotateCcw, Clock } from 'lucide-react';
 import api from '../services/api.ts';
 import Card from '../components/common/Card.tsx';
 import Button from '../components/common/Button.tsx';
-import Badge from '../components/common/Badge.tsx';
 import LoadingState from '../components/common/LoadingState.tsx';
 import ErrorAlert from '../components/common/ErrorAlert.tsx';
 

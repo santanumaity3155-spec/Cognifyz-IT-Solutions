@@ -29,3 +29,4 @@ export const githubService = {
 };
 
 export default githubService;
+

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
-import { Github, Lock, Mail, ArrowRight } from 'lucide-react';
+import { Github, Lock, Mail } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.tsx';
 import Button from '../components/common/Button.tsx';
 import ErrorAlert from '../components/common/ErrorAlert.tsx';

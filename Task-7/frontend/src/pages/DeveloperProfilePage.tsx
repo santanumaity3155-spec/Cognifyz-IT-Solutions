@@ -1,5 +1,5 @@
 import React from 'react';
-import { UserCheck, Github, ArrowRight, ExternalLink } from 'lucide-react';
+import { UserCheck, Github, ExternalLink } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.tsx';
 import Card from '../components/common/Card.tsx';
 import Button from '../components/common/Button.tsx';

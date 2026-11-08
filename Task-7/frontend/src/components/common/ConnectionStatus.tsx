@@ -1,5 +1,5 @@
 import React from 'react';
-import { Github, CheckCircle2, AlertCircle } from 'lucide-react';
+import { Github } from 'lucide-react';
 import Badge from './Badge.tsx';
 
 interface ConnectionStatusProps {

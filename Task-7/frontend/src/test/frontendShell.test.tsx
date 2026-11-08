@@ -1,7 +1,6 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { BrowserRouter, MemoryRouter } from 'react-router-dom';
-import React from 'react';
+import { MemoryRouter } from 'react-router-dom';
 import Button from '../components/common/Button.tsx';
 import Card from '../components/common/Card.tsx';
 import Badge from '../components/common/Badge.tsx';

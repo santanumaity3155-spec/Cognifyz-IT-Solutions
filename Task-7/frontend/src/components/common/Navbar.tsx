@@ -1,5 +1,5 @@
 import React from 'react';
-import { Menu, LogOut, User as UserIcon, Github } from 'lucide-react';
+import { Menu, LogOut, Github } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext.tsx';
 import ConnectionStatus from './ConnectionStatus.tsx';
 import Button from './Button.tsx';
