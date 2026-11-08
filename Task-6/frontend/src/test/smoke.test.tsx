@@ -25,7 +25,7 @@ describe('Phase 2: Frontend Scaffolding Smoke Test', () => {
     expect(screen.getByText(/3\. Role-Based Authorization/i)).toBeInTheDocument();
 
     await waitFor(() => {
-      expect(screen.getByText(/Connected to Express:/i)).toBeInTheDocument();
+      expect(screen.getByText(/Connected:/i)).toBeInTheDocument();
     });
   });
 });

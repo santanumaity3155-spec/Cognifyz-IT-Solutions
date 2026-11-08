@@ -67,7 +67,7 @@ export const authStore = {
    * Find a user by email address (includes password hash for authentication)
    */
   async findByEmail(email, { includePassword = true } = {}) {
-    if (!email) return null;
+    if (!email || typeof email !== 'string') return null;
     const normalizedEmail = email.trim().toLowerCase();
 
     if (this.isMongoActive()) {

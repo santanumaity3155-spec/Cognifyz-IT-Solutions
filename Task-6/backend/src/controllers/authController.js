@@ -1,4 +1,5 @@
 import authStore from '../services/authStore.js';
+import { generateToken, sendAuthCookie, clearAuthCookie } from '../utils/tokenUtils.js';
 
 /**
  * Handle user registration
@@ -36,11 +37,16 @@ export const register = async (req, res, next) => {
       createdAt: newUser.createdAt,
     };
 
+    // Generate JWT and attach secure HTTP-only cookie
+    const token = generateToken(newUser);
+    sendAuthCookie(res, token);
+
     return res.status(201).json({
       success: true,
       message: 'User registered successfully',
       data: {
         user: safeUser,
+        token,
       },
     });
   } catch (error) {
@@ -95,11 +101,18 @@ export const login = async (req, res, next) => {
       isActive: user.isActive,
     };
 
+    // Generate JWT access token
+    const token = generateToken(user);
+
+    // Set secure HTTP-only cookie
+    sendAuthCookie(res, token);
+
     return res.status(200).json({
       success: true,
       message: 'Login successful',
       data: {
         user: safeUser,
+        token,
       },
     });
   } catch (error) {
@@ -112,7 +125,6 @@ export const login = async (req, res, next) => {
  * GET /api/auth/me
  */
 export const getMe = async (req, res) => {
-  // If req.user was populated by authentication middleware (Phase 7)
   if (req.user) {
     return res.status(200).json({
       success: true,
@@ -123,11 +135,10 @@ export const getMe = async (req, res) => {
     });
   }
 
-  // Without auth middleware token, return 401 Unauthorized
   return res.status(401).json({
     success: false,
     error: 'UNAUTHORIZED',
-    message: 'Authentication required. Full token verification is active in Phase 6 & 7.',
+    message: 'Authentication required. No active session found.',
   });
 };
 
@@ -136,12 +147,11 @@ export const getMe = async (req, res) => {
  * POST /api/auth/logout
  */
 export const logout = (req, res) => {
-  // Clear any existing cookie
-  res.clearCookie('forma_token');
+  // Clear the secure HTTP-only authentication cookie
+  clearAuthCookie(res);
 
   return res.status(200).json({
     success: true,
     message: 'Logged out successfully',
   });
 };
-

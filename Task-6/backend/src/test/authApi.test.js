@@ -46,6 +46,17 @@ describe('Phase 5: User Registration & Login RESTful APIs Suite', () => {
       expect(user.password).toBeUndefined();
       expect(JSON.stringify(res.body)).not.toContain('StrongP@ssw0rd2026');
       expect(JSON.stringify(res.body)).not.toContain('$2a$');
+
+      // Phase 6: JWT token and HTTP-only cookie assertions
+      expect(res.body.data).toHaveProperty('token');
+      expect(typeof res.body.data.token).toBe('string');
+      expect(res.body.data.token.split('.')).toHaveLength(3);
+
+      const cookieHeader = res.headers['set-cookie'];
+      expect(cookieHeader).toBeDefined();
+      const cookieStr = Array.isArray(cookieHeader) ? cookieHeader.join('; ') : cookieHeader;
+      expect(cookieStr).toContain('forma_token=');
+      expect(cookieStr.toLowerCase()).toContain('httponly');
     });
 
     it('1.2 should reject registration when required fields are missing', async () => {
@@ -192,6 +203,17 @@ describe('Phase 5: User Registration & Login RESTful APIs Suite', () => {
       // Verify no password hash is exposed
       expect(user.password).toBeUndefined();
       expect(JSON.stringify(res.body)).not.toContain('$2a$');
+
+      // Phase 6: JWT token and HTTP-only cookie assertions
+      expect(res.body.data).toHaveProperty('token');
+      expect(typeof res.body.data.token).toBe('string');
+      expect(res.body.data.token.split('.')).toHaveLength(3);
+
+      const cookieHeader = res.headers['set-cookie'];
+      expect(cookieHeader).toBeDefined();
+      const cookieStr = Array.isArray(cookieHeader) ? cookieHeader.join('; ') : cookieHeader;
+      expect(cookieStr).toContain('forma_token=');
+      expect(cookieStr.toLowerCase()).toContain('httponly');
     });
 
     it('2.2 should reject login with incorrect password with generic error message', async () => {
@@ -273,6 +295,12 @@ describe('Phase 5: User Registration & Login RESTful APIs Suite', () => {
       expect(res.status).toBe(200);
       expect(res.body.success).toBe(true);
       expect(res.body.message).toBe('Logged out successfully');
+
+      // Verify cookie clear header
+      const cookieHeader = res.headers['set-cookie'];
+      expect(cookieHeader).toBeDefined();
+      const cookieStr = Array.isArray(cookieHeader) ? cookieHeader.join('; ') : cookieHeader;
+      expect(cookieStr).toContain('forma_token=;');
     });
   });
 

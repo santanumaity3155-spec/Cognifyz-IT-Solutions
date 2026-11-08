@@ -2,20 +2,20 @@ import express from 'express';
 import { register, login, getMe, logout } from '../controllers/authController.js';
 import { validateRegister, validateLogin } from '../validators/authValidators.js';
 import { registerLimiter, loginLimiter } from '../middleware/rateLimiter.js';
+import { authenticateUser } from '../middleware/authenticateUser.js';
 
 const router = express.Router();
 
-// Registration: Rate limited + Input validation + Student role enforcement
+// Public: Registration endpoint
 router.post('/register', registerLimiter, validateRegister, register);
 
-// Login: Rate limited + Input validation + Generic credential rejection
+// Public: Login endpoint
 router.post('/login', loginLimiter, validateLogin, login);
 
-// Current user profile
-router.get('/me', getMe);
+// Protected: Current user profile endpoint
+router.get('/me', authenticateUser, getMe);
 
-// Logout
+// Public/Session: Logout endpoint
 router.post('/logout', logout);
 
 export default router;
-
