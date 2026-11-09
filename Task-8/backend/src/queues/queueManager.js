@@ -131,6 +131,7 @@ export const initQueues = async () => {
         const worker = new Worker(
           queueName,
           async (bullJob) => {
+            logger.info(`[BULLMQ WORKER EXEC START] Queue: ${queueName} | JobId: ${bullJob.id}`);
             const start = Date.now();
             await JobLogRepository.updateByJobId(bullJob.id, {
               status: 'active',
@@ -157,7 +158,12 @@ export const initQueues = async () => {
 
             return result;
           },
-          { connection, concurrency: MAX_CONCURRENCY }
+          {
+            connection,
+            concurrency: MAX_CONCURRENCY,
+            drainDelay: 100,
+            stalledInterval: 15000,
+          }
         );
 
         worker.on('failed', async (bullJob, err) => {
@@ -177,6 +183,12 @@ export const initQueues = async () => {
 
         bullWorkers.set(queueName, worker);
       }
+
+      // Wait until all BullMQ queues and workers are fully connected to Redis
+      await Promise.all([
+        ...Array.from(bullQueues.values()).map((q) => q.waitUntilReady()),
+        ...Array.from(bullWorkers.values()).map((w) => w.waitUntilReady()),
+      ]);
 
       queueMode = 'redis_bullmq';
       logger.info(`[QUEUES] BullMQ initialized with 4 Redis queues and workers.`);
@@ -224,7 +236,7 @@ export const enqueueJob = async (queueName, jobType, payload, options = {}) => {
         attempts: maxAttempts,
         backoff: {
           type: 'exponential',
-          delay: 1000,
+          delay: 500,
         },
         removeOnComplete: false,
         removeOnFail: false,

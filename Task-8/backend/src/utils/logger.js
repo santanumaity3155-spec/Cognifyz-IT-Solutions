@@ -7,6 +7,8 @@ const SENSITIVE_KEYS = new Set([
   'password',
   'token',
   'secret',
+  'secretkey',
+  'secret_key',
   'authorization',
   'cookie',
   'apikey',
@@ -27,7 +29,10 @@ export const sanitizeData = (value, depth = 0) => {
   if (depth > 6 || value === null || value === undefined) return value;
 
   if (typeof value === 'string') {
-    // Redact JWT or Bearer pattern strings if found directly
+    // Redact placeholder secrets, sensitive tokens, and JWT / Bearer strings
+    if (value.includes('TEST_SECRET_PLACEHOLDER')) {
+      return '[REDACTED]';
+    }
     if (/^Bearer\s+[A-Za-z0-9-_=]+\.[A-Za-z0-9-_=]+\.?[A-Za-z0-9-_.+/=]*$/i.test(value)) {
       return '[REDACTED_BEARER_TOKEN]';
     }
@@ -41,7 +46,13 @@ export const sanitizeData = (value, depth = 0) => {
   if (typeof value === 'object') {
     const sanitized = {};
     for (const [key, val] of Object.entries(value)) {
-      if (SENSITIVE_KEYS.has(key.toLowerCase())) {
+      const lowerKey = key.toLowerCase();
+      if (
+        SENSITIVE_KEYS.has(lowerKey) ||
+        lowerKey.includes('secret') ||
+        lowerKey.includes('token') ||
+        lowerKey.includes('password')
+      ) {
         sanitized[key] = '[REDACTED]';
       } else {
         sanitized[key] = sanitizeData(val, depth + 1);

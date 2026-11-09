@@ -23,6 +23,10 @@ export const requestLoggerMiddleware = (req, res, next) => {
       ip: req.ip || req.socket?.remoteAddress || 'unknown',
     };
 
+    if (req.body && typeof req.body === 'object' && Object.keys(req.body).length > 0) {
+      meta.body = req.body;
+    }
+
     // Log to console via structured logger
     if (res.statusCode >= 500) {
       logger.error(`HTTP ${req.method} ${meta.path} ${res.statusCode} in ${durationMs}ms`, meta);

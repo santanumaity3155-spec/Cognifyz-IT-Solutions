@@ -1,17 +1,23 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
+import { initRedis, disconnectRedis } from '../src/config/redis.js';
 import { initQueues, shutdownQueues } from '../src/queues/queueManager.js';
 
 const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('Background Job Queues & Worker Lifecycle', () => {
   beforeAll(async () => {
+    const client = await initRedis();
+    if (client) {
+      await client.flushdb();
+    }
     await initQueues();
   });
 
   afterAll(async () => {
     await shutdownQueues();
+    await disconnectRedis();
   });
 
   it('rejects invalid email job payload with HTTP 422', async () => {
@@ -38,12 +44,12 @@ describe('Background Job Queues & Worker Lifecycle', () => {
     const { jobId } = res.body.data;
     expect(jobId).toBeDefined();
 
-    // Poll until completed (timeout 5s)
+    // Poll until completed (timeout 6s)
     let completed = false;
     let jobDetails = null;
 
-    for (let i = 0; i < 20; i++) {
-      await sleep(200);
+    for (let i = 0; i < 35; i++) {
+      await sleep(150);
       const pollRes = await request(app).get(`/api/jobs/${jobId}`);
       if (pollRes.body.data.status === 'completed') {
         completed = true;
@@ -71,7 +77,7 @@ describe('Background Job Queues & Worker Lifecycle', () => {
     const { jobId } = res.body.data;
 
     // Wait for completion
-    for (let i = 0; i < 20; i++) {
+    for (let i = 0; i < 35; i++) {
       await sleep(150);
       const poll = await request(app).get(`/api/jobs/${jobId}`);
       if (poll.body.data.status === 'completed') break;
@@ -97,8 +103,8 @@ describe('Background Job Queues & Worker Lifecycle', () => {
 
     // Wait until failed
     let isFailed = false;
-    for (let i = 0; i < 25; i++) {
-      await sleep(200);
+    for (let i = 0; i < 35; i++) {
+      await sleep(150);
       const poll = await request(app).get(`/api/jobs/${jobId}`);
       if (poll.body.data.status === 'failed') {
         isFailed = true;

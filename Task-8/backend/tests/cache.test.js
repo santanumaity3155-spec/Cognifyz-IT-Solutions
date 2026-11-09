@@ -1,9 +1,20 @@
-import { describe, it, expect, beforeEach } from 'vitest';
+import { describe, it, expect, beforeAll, afterAll, beforeEach } from 'vitest';
 import request from 'supertest';
 import { app } from '../src/app.js';
 import { CacheService } from '../src/cache/cacheService.js';
+import { initRedis, disconnectRedis } from '../src/config/redis.js';
+
+const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 describe('Server-Side Caching & Optimization', () => {
+  beforeAll(async () => {
+    await initRedis();
+  });
+
+  afterAll(async () => {
+    await disconnectRedis();
+  });
+
   beforeEach(async () => {
     CacheService.resetStats();
     await CacheService.flush();
@@ -71,6 +82,32 @@ describe('Server-Side Caching & Optimization', () => {
 
     expect(res.status).toBe(200);
     expect(res.headers['x-cache']).toBe('BYPASS');
+  });
+
+  it('expires cache key automatically after TTL elapses', async () => {
+    await CacheService.set('ttl_key', { temporary: true }, 1);
+    const immediate = await CacheService.get('ttl_key');
+    expect(immediate).not.toBeNull();
+    expect(immediate.value).toEqual({ temporary: true });
+
+    // Wait 1.1s for TTL expiration
+    await sleep(1100);
+
+    const expired = await CacheService.get('ttl_key');
+    expect(expired).toBeNull();
+  });
+
+  it('supports explicit key invalidation via DELETE /api/cache/key/:key', async () => {
+    await CacheService.set('to_be_deleted', { value: 123 }, 60);
+    const beforeDel = await CacheService.get('to_be_deleted');
+    expect(beforeDel).not.toBeNull();
+
+    const delRes = await request(app).delete('/api/cache/key/to_be_deleted');
+    expect(delRes.status).toBe(200);
+    expect(delRes.body.success).toBe(true);
+
+    const afterDel = await CacheService.get('to_be_deleted');
+    expect(afterDel).toBeNull();
   });
 
   it('runs live performance comparison benchmark endpoint successfully', async () => {

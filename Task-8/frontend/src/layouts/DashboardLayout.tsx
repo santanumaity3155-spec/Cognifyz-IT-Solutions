@@ -184,7 +184,7 @@ export const DashboardLayout: React.FC = () => {
         )}
 
         {/* Page Content Scroll View */}
-        <main className="flex-1 overflow-y-auto p-4 sm:p-6 lg:p-8 bg-slate-950">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden p-3 sm:p-6 lg:p-8 bg-slate-950 min-w-0 max-w-full">
           <Outlet />
         </main>
       </div>

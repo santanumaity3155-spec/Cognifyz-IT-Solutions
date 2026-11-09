@@ -159,7 +159,7 @@ export const JobsPage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 max-w-full min-w-0">
       {/* Top Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -172,7 +172,7 @@ export const JobsPage: React.FC = () => {
           </p>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => setAutoPoll(!autoPoll)}
             className={`px-3 py-1.5 rounded-lg border text-xs font-medium flex items-center gap-1.5 transition ${
@@ -201,10 +201,10 @@ export const JobsPage: React.FC = () => {
       )}
 
       {/* Diagnostics Banner */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 max-w-full min-w-0">
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-4 pb-4 border-b border-slate-800">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <span className="text-xs font-semibold uppercase tracking-wider text-slate-400">Queue Engine Mode:</span>
               <span
                 className={`text-xs font-bold px-2.5 py-0.5 rounded-full border ${
@@ -223,7 +223,7 @@ export const JobsPage: React.FC = () => {
             </p>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-mono">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-4 text-xs font-mono">
             <div className="bg-slate-950 px-3 py-1.5 rounded-lg border border-slate-800 text-slate-300">
               Concurrency: <span className="text-indigo-400 font-bold">{queueStats?.concurrency || 3}</span>
             </div>
@@ -234,7 +234,7 @@ export const JobsPage: React.FC = () => {
         </div>
 
         {/* Status Counters */}
-        <div className="grid grid-cols-2 sm:grid-cols-5 gap-3">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-2.5 sm:gap-3">
           <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-center">
             <div className="text-[11px] uppercase text-slate-400">Total Jobs</div>
             <div className="text-lg font-bold text-white mt-0.5">{queueStats?.counts.total ?? 0}</div>
@@ -251,7 +251,7 @@ export const JobsPage: React.FC = () => {
             <div className="text-[11px] uppercase text-slate-400">Completed</div>
             <div className="text-lg font-bold text-emerald-400 mt-0.5">{queueStats?.counts.completed ?? 0}</div>
           </div>
-          <div className="bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-center">
+          <div className="col-span-2 sm:col-span-1 bg-slate-950/60 p-3 rounded-xl border border-slate-800 text-center">
             <div className="text-[11px] uppercase text-slate-400">Failed</div>
             <div className="text-lg font-bold text-rose-400 mt-0.5">{queueStats?.counts.failed ?? 0}</div>
           </div>
@@ -259,14 +259,14 @@ export const JobsPage: React.FC = () => {
       </div>
 
       {/* Job Enqueue Dispatch Form */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
+      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-4 sm:p-5 max-w-full min-w-0">
         <h3 className="text-sm font-semibold text-white mb-4 flex items-center gap-2">
           <Play className="w-4 h-4 text-indigo-400" />
           Dispatch New Background Job
         </h3>
 
         {/* Tabs */}
-        <div className="flex border-b border-slate-800 mb-5 gap-2">
+        <div className="flex border-b border-slate-800 mb-5 gap-1.5 sm:gap-2 overflow-x-auto pb-1 max-w-full">
           {[
             { id: 'email', label: 'Email Job', icon: <Send className="w-3.5 h-3.5" /> },
             { id: 'report', label: 'Report Job', icon: <FileText className="w-3.5 h-3.5" /> },
@@ -276,7 +276,7 @@ export const JobsPage: React.FC = () => {
             <button
               key={tab.id}
               onClick={() => setActiveTab(tab.id as any)}
-              className={`flex items-center gap-1.5 pb-2.5 px-3 text-xs font-semibold border-b-2 transition ${
+              className={`flex-shrink-0 whitespace-nowrap flex items-center gap-1.5 pb-2.5 px-3 text-xs font-semibold border-b-2 transition ${
                 activeTab === tab.id
                   ? 'border-indigo-500 text-indigo-400'
                   : 'border-transparent text-slate-400 hover:text-slate-200'
@@ -492,7 +492,7 @@ export const JobsPage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h3 className="text-sm font-semibold text-white">Live Job Queue History ({filteredJobs.length})</h3>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
@@ -508,7 +508,7 @@ export const JobsPage: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-mono">
+          <table className="w-full min-w-[640px] text-left text-xs font-mono">
             <thead className="bg-slate-950/60 text-slate-400 border-b border-slate-800 uppercase text-[11px]">
               <tr>
                 <th className="py-2.5 px-3">Job ID</th>

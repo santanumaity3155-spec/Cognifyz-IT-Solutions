@@ -191,6 +191,42 @@ export const CacheService = {
     const totalReads = hits + misses;
     const hitRatio = totalReads > 0 ? `${((hits / totalReads) * 100).toFixed(1)}%` : '0.0%';
 
+    if (redis && redisStatus.isConnected) {
+      try {
+        const fullPattern = buildKey('*');
+        const redisKeyNames = await redis.keys(fullPattern);
+        const redisKeys = [];
+        for (const k of redisKeyNames) {
+          const ttl = await redis.ttl(k);
+          if (ttl >= 0) {
+            const val = await redis.get(k);
+            const sizeBytes = val ? Buffer.byteLength(val, 'utf8') : 0;
+            const memItem = memoryStore.get(k);
+            redisKeys.push({
+              key: k,
+              ttlSeconds: ttl > 0 ? ttl : null,
+              sizeBytes,
+              createdAt: memItem?.createdAt || new Date().toISOString(),
+            });
+          }
+        }
+        return {
+          mode: 'redis',
+          isRedisConnected: true,
+          namespace: env.CACHE_NAMESPACE,
+          hits,
+          misses,
+          totalReads,
+          hitRatio,
+          totalWrites,
+          activeKeysCount: redisKeys.length,
+          keys: redisKeys,
+        };
+      } catch (err) {
+        logger.warn(`[CACHE WARNING] Error querying Redis keys for stats: ${err.message}`);
+      }
+    }
+
     const activeKeys = [];
     const now = Date.now();
 

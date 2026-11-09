@@ -77,5 +77,40 @@ describe('Advanced Middleware Pipeline', () => {
     expect(res.body.data.summary.totalRequests).toBeGreaterThan(0);
     expect(res.body.data.recentRequests.length).toBeGreaterThan(0);
   });
+
+  it('redacts sensitive fields and TEST_SECRET_PLACEHOLDER in structured logger', async () => {
+    const { sanitizeData } = await import('../src/utils/logger.js');
+
+    const testObject = {
+      service: 'Forma Client',
+      testValue: 42,
+      secretKey: 'TEST_SECRET_PLACEHOLDER',
+      api_token: 'secret123',
+      nested: {
+        rawPassword: 'password999',
+        normalField: 'visible',
+      },
+    };
+
+    const sanitized = sanitizeData(testObject);
+    expect(sanitized.secretKey).toBe('[REDACTED]');
+    expect(sanitized.api_token).toBe('[REDACTED]');
+    expect(sanitized.nested.rawPassword).toBe('[REDACTED]');
+    expect(sanitized.nested.normalField).toBe('visible');
+    expect(JSON.stringify(sanitized)).not.toContain('TEST_SECRET_PLACEHOLDER');
+
+    // Test echo request with TEST_SECRET_PLACEHOLDER
+    const res = await request(app)
+      .post('/api/middleware/echo')
+      .send({
+        service: 'Forma Client',
+        testValue: 42,
+        secretKey: 'TEST_SECRET_PLACEHOLDER',
+      });
+
+    expect(res.status).toBe(200);
+    expect(res.body.success).toBe(true);
+    expect(res.body.data.body.secretKey).toBe('TEST_SECRET_PLACEHOLDER');
+  });
 });
 

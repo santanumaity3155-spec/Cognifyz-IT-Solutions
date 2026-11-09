@@ -1,5 +1,6 @@
 import mongoose from 'mongoose';
 import { getDatabaseStatus } from '../config/db.js';
+import { getRedisClient, getRedisStatus } from '../config/redis.js';
 
 const jobLogSchema = new mongoose.Schema(
   {
@@ -29,29 +30,50 @@ const jobLogSchema = new mongoose.Schema(
 // Mongoose model instance
 const MongooseJobLog = mongoose.models.JobLog || mongoose.model('JobLog', jobLogSchema);
 
-// In-memory fallback repository when MongoDB is disconnected
+// In-memory fallback repository when MongoDB and Redis are disconnected
 const inMemoryStore = new Map();
+const deletedTombstones = new Set();
 
 /**
- * Unified JobLog persistence repository supporting both MongoDB and In-Memory fallback.
+ * Unified JobLog persistence repository supporting MongoDB, Redis, and In-Memory fallback.
  */
 export const JobLogRepository = {
   async create(data) {
+    deletedTombstones.delete(data.jobId);
     const db = getDatabaseStatus();
+    const redis = getRedisClient();
+    const redisStatus = getRedisStatus();
+
+    if (redis && redisStatus.isConnected) {
+      try {
+        await redis.del(`forma:deleted:${data.jobId}`);
+      } catch {}
+    }
+
     const doc = {
       ...data,
-      createdAt: new Date(),
-      updatedAt: new Date(),
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
     };
 
     if (db.isConnected) {
       try {
         const created = await MongooseJobLog.create(doc);
-        inMemoryStore.set(doc.jobId, created.toObject());
-        return created.toObject();
-      } catch {
-        // Fall back to memory if DB query fails
-      }
+        const obj = created.toObject();
+        inMemoryStore.set(doc.jobId, obj);
+        if (redis && redisStatus.isConnected) {
+          await redis.set(`forma:job:${doc.jobId}`, JSON.stringify(obj));
+          await redis.sadd('forma:jobs:all', doc.jobId);
+        }
+        return obj;
+      } catch {}
+    }
+
+    if (redis && redisStatus.isConnected) {
+      try {
+        await redis.set(`forma:job:${doc.jobId}`, JSON.stringify(doc));
+        await redis.sadd('forma:jobs:all', doc.jobId);
+      } catch {}
     }
 
     inMemoryStore.set(doc.jobId, doc);
@@ -59,6 +81,21 @@ export const JobLogRepository = {
   },
 
   async findByJobId(jobId) {
+    if (deletedTombstones.has(jobId)) return null;
+
+    const redis = getRedisClient();
+    const redisStatus = getRedisStatus();
+    if (redis && redisStatus.isConnected) {
+      try {
+        const isDeleted = await redis.get(`forma:deleted:${jobId}`);
+        if (isDeleted) {
+          deletedTombstones.add(jobId);
+          inMemoryStore.delete(jobId);
+          return null;
+        }
+      } catch {}
+    }
+
     const db = getDatabaseStatus();
     if (db.isConnected) {
       try {
@@ -66,14 +103,37 @@ export const JobLogRepository = {
         if (found) return found;
       } catch {}
     }
+
+    if (redis && redisStatus.isConnected) {
+      try {
+        const raw = await redis.get(`forma:job:${jobId}`);
+        if (raw) return JSON.parse(raw);
+      } catch {}
+    }
+
     return inMemoryStore.get(jobId) || null;
   },
 
   async updateByJobId(jobId, updates) {
+    if (deletedTombstones.has(jobId)) return null;
+
+    const redis = getRedisClient();
+    const redisStatus = getRedisStatus();
+    if (redis && redisStatus.isConnected) {
+      try {
+        const isDeleted = await redis.get(`forma:deleted:${jobId}`);
+        if (isDeleted) {
+          deletedTombstones.add(jobId);
+          inMemoryStore.delete(jobId);
+          return null;
+        }
+      } catch {}
+    }
+
     const db = getDatabaseStatus();
     const updateDoc = {
       ...updates,
-      updatedAt: new Date(),
+      updatedAt: new Date().toISOString(),
     };
 
     if (db.isConnected) {
@@ -85,14 +145,42 @@ export const JobLogRepository = {
         ).lean();
         if (updated) {
           inMemoryStore.set(jobId, updated);
+          if (redis && redisStatus.isConnected) {
+            await redis.set(`forma:job:${jobId}`, JSON.stringify(updated));
+            await redis.sadd('forma:jobs:all', jobId);
+          }
           return updated;
         }
       } catch {}
     }
 
-    const existing = inMemoryStore.get(jobId) || {};
-    const merged = { ...existing, ...updateDoc };
+    let current = inMemoryStore.get(jobId);
+
+    if (redis && redisStatus.isConnected) {
+      try {
+        const raw = await redis.get(`forma:job:${jobId}`);
+        if (raw) current = JSON.parse(raw);
+        else if (!current) {
+          // Job was deleted or does not exist; do not resurrect deleted records
+          return null;
+        }
+      } catch {}
+    }
+
+    if (!current) {
+      return null;
+    }
+
+    const merged = { ...current, ...updateDoc };
     inMemoryStore.set(jobId, merged);
+
+    if (redis && redisStatus.isConnected) {
+      try {
+        await redis.set(`forma:job:${jobId}`, JSON.stringify(merged));
+        await redis.sadd('forma:jobs:all', jobId);
+      } catch {}
+    }
+
     return merged;
   },
 
@@ -113,8 +201,27 @@ export const JobLogRepository = {
       } catch {}
     }
 
-    // In-memory filter & pagination
-    let items = Array.from(inMemoryStore.values());
+    const redis = getRedisClient();
+    const redisStatus = getRedisStatus();
+    let items = [];
+
+    if (redis && redisStatus.isConnected) {
+      try {
+        const ids = await redis.smembers('forma:jobs:all');
+        if (ids && ids.length > 0) {
+          const keys = ids.map((id) => `forma:job:${id}`);
+          const rawDocs = await redis.mget(...keys);
+          items = rawDocs.filter(Boolean).map((str) => JSON.parse(str));
+        }
+      } catch {}
+    }
+
+    if (items.length === 0) {
+      items = Array.from(inMemoryStore.values());
+    }
+
+    items = items.filter((item) => !deletedTombstones.has(item.jobId));
+
     if (filter.queueName) {
       items = items.filter((item) => item.queueName === filter.queueName);
     }
@@ -132,19 +239,80 @@ export const JobLogRepository = {
   },
 
   async deleteByJobId(jobId) {
+    deletedTombstones.add(jobId);
     const db = getDatabaseStatus();
     if (db.isConnected) {
       try {
         await MongooseJobLog.deleteOne({ jobId });
       } catch {}
     }
+
+    const redis = getRedisClient();
+    const redisStatus = getRedisStatus();
+    if (redis && redisStatus.isConnected) {
+      try {
+        await redis.set(`forma:deleted:${jobId}`, '1', 'EX', 3600);
+        await redis.del(`forma:job:${jobId}`);
+        await redis.srem('forma:jobs:all', jobId);
+      } catch {}
+    }
+
     const had = inMemoryStore.has(jobId);
     inMemoryStore.delete(jobId);
-    return had;
+    return had || true;
   },
 
   async getCounts() {
-    const items = Array.from(inMemoryStore.values());
+    const db = getDatabaseStatus();
+    if (db.isConnected) {
+      try {
+        const total = await MongooseJobLog.countDocuments();
+        const waiting = await MongooseJobLog.countDocuments({ status: 'waiting' });
+        const active = await MongooseJobLog.countDocuments({ status: 'active' });
+        const completed = await MongooseJobLog.countDocuments({ status: 'completed' });
+        const failed = await MongooseJobLog.countDocuments({ status: 'failed' });
+        const cancelled = await MongooseJobLog.countDocuments({ status: 'cancelled' });
+        const emailQueue = await MongooseJobLog.countDocuments({ queueName: 'emailQueue' });
+        const reportQueue = await MongooseJobLog.countDocuments({ queueName: 'reportQueue' });
+        const analyticsQueue = await MongooseJobLog.countDocuments({ queueName: 'analyticsQueue' });
+        const maintenanceQueue = await MongooseJobLog.countDocuments({ queueName: 'maintenanceQueue' });
+
+        return {
+          total,
+          waiting,
+          active,
+          completed,
+          failed,
+          cancelled,
+          byQueue: {
+            emailQueue,
+            reportQueue,
+            analyticsQueue,
+            maintenanceQueue,
+          },
+        };
+      } catch {}
+    }
+
+    const redis = getRedisClient();
+    const redisStatus = getRedisStatus();
+    let items = [];
+
+    if (redis && redisStatus.isConnected) {
+      try {
+        const ids = await redis.smembers('forma:jobs:all');
+        if (ids && ids.length > 0) {
+          const keys = ids.map((id) => `forma:job:${id}`);
+          const rawDocs = await redis.mget(...keys);
+          items = rawDocs.filter(Boolean).map((str) => JSON.parse(str));
+        }
+      } catch {}
+    }
+
+    if (items.length === 0) {
+      items = Array.from(inMemoryStore.values());
+    }
+
     const counts = {
       total: items.length,
       waiting: 0,

@@ -22,7 +22,7 @@ export const MiddlewarePage: React.FC = () => {
   const [statusFilter, setStatusFilter] = useState<string>('ALL');
 
   // Interactive console states
-  const [echoPayload, setEchoPayload] = useState('{\n  "service": "Forma Client",\n  "testValue": 42,\n  "secretKey": "mySecretToken123"\n}');
+  const [echoPayload, setEchoPayload] = useState('{\n  "service": "Forma Client",\n  "testValue": 42,\n  "secretKey": "TEST_SECRET_PLACEHOLDER"\n}');
   const [echoResponse, setEchoResponse] = useState<any>(null);
   const [errorSimulationResult, setErrorSimulationResult] = useState<any>(null);
   const [isExecuting, setIsExecuting] = useState(false);
@@ -101,7 +101,7 @@ export const MiddlewarePage: React.FC = () => {
   ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0 max-w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -283,13 +283,13 @@ export const MiddlewarePage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h3 className="text-sm font-semibold text-white">Live Request Log Stream (Buffer: {telemetry?.recentRequests.length || 0})</h3>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <input
               type="text"
               placeholder="Filter by path, method, ID..."
               value={searchFilter}
               onChange={(e) => setSearchFilter(e.target.value)}
-              className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-48"
+              className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-full sm:w-48"
             />
 
             <select
@@ -306,7 +306,7 @@ export const MiddlewarePage: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-mono">
+          <table className="w-full min-w-[640px] text-left text-xs font-mono">
             <thead className="bg-slate-950/60 text-slate-400 border-b border-slate-800 uppercase text-[11px]">
               <tr>
                 <th className="py-2.5 px-3">Method</th>

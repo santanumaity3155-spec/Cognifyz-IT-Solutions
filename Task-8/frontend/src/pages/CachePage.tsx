@@ -114,7 +114,7 @@ export const CachePage: React.FC = () => {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-w-0 max-w-full">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
@@ -375,13 +375,13 @@ export const CachePage: React.FC = () => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-4">
           <h3 className="text-sm font-semibold text-white">Active Cache Keys ({stats?.activeKeysCount ?? 0})</h3>
 
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <input
               type="text"
               placeholder="Pattern (e.g. stats* or blank for all)"
               value={purgePattern}
               onChange={(e) => setPurgePattern(e.target.value)}
-              className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-56"
+              className="bg-slate-950 border border-slate-700 text-xs text-slate-200 rounded-lg px-3 py-1.5 focus:outline-none focus:border-indigo-500 w-full sm:w-56"
             />
             <button
               onClick={handlePurge}
@@ -394,7 +394,7 @@ export const CachePage: React.FC = () => {
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs font-mono">
+          <table className="w-full min-w-[550px] text-left text-xs font-mono">
             <thead className="bg-slate-950/60 text-slate-400 border-b border-slate-800 uppercase text-[11px]">
               <tr>
                 <th className="py-2.5 px-3">Cache Key</th>
@@ -414,7 +414,7 @@ export const CachePage: React.FC = () => {
               ) : (
                 stats.keys.map((k) => (
                   <tr key={k.key} className="hover:bg-slate-800/40 transition">
-                    <td className="py-2.5 px-3 font-bold text-indigo-300">{k.key}</td>
+                    <td className="py-2.5 px-3 font-bold text-indigo-300 truncate max-w-[200px]" title={k.key}>{k.key}</td>
                     <td className="py-2.5 px-3 text-emerald-400">{k.ttlSeconds}s</td>
                     <td className="py-2.5 px-3 text-slate-400">{k.sizeBytes} B</td>
                     <td className="py-2.5 px-3 text-slate-500">{new Date(k.createdAt).toLocaleTimeString()}</td>
