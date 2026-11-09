@@ -1,11 +1,12 @@
 import React from 'react';
 import { clsx } from 'clsx';
 
-interface BadgeProps {
+export interface BadgeProps {
   children: React.ReactNode;
   variant?: 'success' | 'warning' | 'error' | 'info' | 'purple' | 'neutral';
-  size?: 'sm' | 'md';
+  size?: 'sm' | 'md' | 'lg';
   dot?: boolean;
+  className?: string;
 }
 
 export const Badge: React.FC<BadgeProps> = ({
@@ -13,31 +14,39 @@ export const Badge: React.FC<BadgeProps> = ({
   variant = 'neutral',
   size = 'md',
   dot = false,
+  className,
 }) => {
   const variantStyles = {
-    success: 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30',
-    warning: 'bg-amber-500/10 text-amber-400 border-amber-500/30',
-    error: 'bg-rose-500/10 text-rose-400 border-rose-500/30',
-    info: 'bg-sky-500/10 text-sky-400 border-sky-500/30',
-    purple: 'bg-purple-500/10 text-purple-400 border-purple-500/30',
-    neutral: 'bg-slate-800 text-slate-300 border-slate-700',
+    success: 'bg-[#65DDA5]/10 text-[#65DDA5] border-[#65DDA5]/30',
+    warning: 'bg-[#F5B94C]/10 text-[#F5B94C] border-[#F5B94C]/30',
+    error: 'bg-[#F16C80]/10 text-[#F16C80] border-[#F16C80]/30',
+    info: 'bg-[#5379F5]/10 text-[#7DA4F8] border-[#5379F5]/30',
+    purple: 'bg-[#6257F5]/15 text-[#A99CFB] border-[#6257F5]/35',
+    neutral: 'bg-[#223249]/70 text-slate-300 border-[#34435B]',
   }[variant];
 
   const dotColors = {
-    success: 'bg-emerald-400',
-    warning: 'bg-amber-400',
-    error: 'bg-rose-400',
-    info: 'bg-sky-400',
-    purple: 'bg-purple-400',
+    success: 'bg-[#65DDA5]',
+    warning: 'bg-[#F5B94C]',
+    error: 'bg-[#F16C80]',
+    info: 'bg-[#5379F5]',
+    purple: 'bg-[#A99CFB]',
     neutral: 'bg-slate-400',
   }[variant];
+
+  const sizeStyles = {
+    sm: 'px-2 py-0.5 text-[11px]',
+    md: 'px-2.5 py-1 text-xs',
+    lg: 'px-3 py-1.5 text-xs',
+  }[size];
 
   return (
     <span
       className={clsx(
-        'inline-flex items-center gap-1.5 font-medium rounded-full border',
-        size === 'sm' ? 'px-2 py-0.5 text-[11px]' : 'px-2.5 py-1 text-xs',
-        variantStyles
+        'inline-flex items-center gap-1.5 font-medium rounded-full border transition-colors',
+        sizeStyles,
+        variantStyles,
+        className
       )}
     >
       {dot && <span className={clsx('w-1.5 h-1.5 rounded-full animate-pulse', dotColors)} />}
@@ -47,4 +56,3 @@ export const Badge: React.FC<BadgeProps> = ({
 };
 
 export default Badge;
-

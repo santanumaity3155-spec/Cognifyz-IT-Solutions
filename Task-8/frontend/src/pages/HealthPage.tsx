@@ -5,6 +5,7 @@ import {
   Cpu,
   RotateCw,
   Terminal,
+  Zap,
 } from 'lucide-react';
 import Badge from '../components/common/Badge';
 import { fetchHealth, fetchReadiness } from '../services/api';
@@ -26,6 +27,8 @@ export const HealthPage: React.FC = () => {
 
   useEffect(() => {
     loadHealth();
+    const interval = setInterval(loadHealth, 6000);
+    return () => clearInterval(interval);
   }, []);
 
   const handleRunReadinessProbe = async () => {
@@ -48,16 +51,23 @@ export const HealthPage: React.FC = () => {
     return `${hours}h ${minutes}m ${seconds}s`;
   };
 
+  const isRedisLive = health?.infrastructure.redis.isConnected;
+  const isMongoLive = health?.infrastructure.database.isConnected;
+
+  const heapUsed = health?.memory.heapUsedMb ?? 0;
+  const heapTotal = health?.memory.heapTotalMb ?? 1;
+  const heapPercent = Math.min(Math.round((heapUsed / heapTotal) * 100), 100);
+
   return (
-    <div className="space-y-6 min-w-0 max-w-full">
+    <div className="space-y-6 min-w-0 max-w-full font-sans">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h2 className="text-xl font-bold text-white tracking-tight flex items-center gap-2">
-            <Activity className="w-5 h-5 text-indigo-400" />
+          <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight flex items-center gap-2.5">
+            <Activity className="w-6 h-6 text-[#6257F5]" />
             System Health & Infrastructure Diagnostics
           </h2>
-          <p className="text-sm text-slate-400 mt-0.5">
+          <p className="text-xs sm:text-sm text-slate-400 mt-1">
             Node.js process status, memory heap allocation, and external service availability probes.
           </p>
         </div>
@@ -66,7 +76,7 @@ export const HealthPage: React.FC = () => {
           <button
             onClick={handleRunReadinessProbe}
             disabled={isProbing}
-            className="px-3.5 py-1.5 rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white text-xs font-semibold flex items-center gap-1.5 transition shadow-md shadow-indigo-600/30"
+            className="px-4 py-2.5 rounded-xl bg-[#6257F5] hover:bg-[#5346EE] text-white text-xs font-bold flex items-center gap-2 transition shadow-lg shadow-[#6257F5]/30 active:scale-95"
           >
             <RotateCw className={`w-3.5 h-3.5 ${isProbing ? 'animate-spin' : ''}`} />
             Run Readiness Probe
@@ -75,14 +85,17 @@ export const HealthPage: React.FC = () => {
       </div>
 
       {readiness && (
-        <div className="p-4 bg-slate-900 border border-slate-800 rounded-2xl">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-bold text-white uppercase tracking-wider">Readiness Probe Output:</span>
-            <Badge variant={readiness.success ? 'success' : 'warning'} size="sm">
+        <div className="p-5 bg-[#1D2A3D] border border-[#34435B] rounded-2xl shadow-card animate-fadeIn">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-white uppercase tracking-wider flex items-center gap-2">
+              <Zap className="w-4 h-4 text-[#65DDA5]" />
+              Readiness Probe Output:
+            </span>
+            <Badge variant={readiness.success ? 'success' : 'warning'} size="sm" dot>
               {readiness.status || 'PROBE_CHECK'}
             </Badge>
           </div>
-          <pre className="p-3 bg-slate-950 rounded-xl text-xs font-mono text-slate-300 overflow-x-auto">
+          <pre className="p-3.5 bg-[#141F30] rounded-xl text-xs font-mono text-slate-300 overflow-x-auto border border-[#34435B]">
             {JSON.stringify(readiness, null, 2)}
           </pre>
         </div>
@@ -90,44 +103,74 @@ export const HealthPage: React.FC = () => {
 
       {/* Process & System Metrics Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Server Status</div>
-          <div className="flex items-center gap-2">
-            <span className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
-            <span className="text-2xl font-bold text-white">{health?.status || 'UP'}</span>
+        {/* Server Status */}
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card flex flex-col justify-between">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Server Status</div>
+            <div className="flex items-center gap-2.5">
+              <span className="w-3.5 h-3.5 rounded-full bg-[#65DDA5] shadow-glow-green animate-pulse" />
+              <span className="text-3xl font-extrabold text-white">{health?.status || 'UP'}</span>
+            </div>
           </div>
-          <div className="text-xs text-slate-400 mt-2">
-            Uptime: <span className="text-indigo-400 font-semibold">{formatUptime(health?.uptimeSeconds || 0)}</span>
-          </div>
-        </div>
-
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Node.js Heap Memory</div>
-          <div className="text-2xl font-bold text-emerald-400">
-            {health?.memory.heapUsedMb ?? 0} MB
-          </div>
-          <div className="text-xs text-slate-400 mt-2">
-            Total Allocated: <span className="text-slate-300 font-semibold">{health?.memory.heapTotalMb ?? 0} MB</span>
+          <div className="text-xs text-slate-400 mt-4 pt-3 border-t border-[#34435B]/40 flex items-center justify-between">
+            <span>Uptime:</span>
+            <span className="text-[#A99CFB] font-bold font-mono">{formatUptime(health?.uptimeSeconds || 0)}</span>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Resident Set (RSS)</div>
-          <div className="text-2xl font-bold text-indigo-400">
-            {health?.memory.rssMb ?? 0} MB
+        {/* Node.js Heap Memory */}
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card flex flex-col justify-between">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Node.js Heap Memory</div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-3xl font-extrabold text-[#65DDA5] font-mono">{heapUsed} MB</span>
+              <span className="text-xs text-slate-400">/ {heapTotal} MB</span>
+            </div>
+            {/* Memory progress bar */}
+            <div className="w-full bg-[#141F30] h-2 rounded-full overflow-hidden mt-3 border border-[#34435B]/40">
+              <div
+                className="bg-gradient-to-r from-[#6257F5] to-[#65DDA5] h-full transition-all duration-300"
+                style={{ width: `${heapPercent}%` }}
+              />
+            </div>
           </div>
-          <div className="text-xs text-slate-400 mt-2">
-            Node Version: <span className="text-slate-300 font-semibold">{health?.system.nodeVersion || 'v24'}</span>
+          <div className="text-xs text-slate-400 mt-3 pt-3 border-t border-[#34435B]/40 flex items-center justify-between">
+            <span>Allocation:</span>
+            <span className="text-slate-200 font-mono font-bold">{heapPercent}% used</span>
           </div>
         </div>
 
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <div className="text-xs font-semibold uppercase tracking-wider text-slate-400 mb-2">Host Platform</div>
-          <div className="text-2xl font-bold text-white capitalize">
-            {health?.system.platform || 'windows'}
+        {/* Resident Set (RSS) */}
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card flex flex-col justify-between">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Resident Set (RSS)</div>
+            <div className="text-3xl font-extrabold text-[#5379F5] font-mono">
+              {health?.memory.rssMb ?? 0} MB
+            </div>
+            <div className="text-xs text-slate-400 mt-2">
+              External Buffers: <span className="text-slate-300 font-mono">{health?.memory.externalMb ?? 0} MB</span>
+            </div>
           </div>
-          <div className="text-xs text-slate-400 mt-2">
-            CPUs: <span className="text-slate-300 font-semibold">{health?.system.cpuCount || 0} cores</span> &bull; Free RAM: {health?.system.freeMemMb || 0} MB
+          <div className="text-xs text-slate-400 mt-3 pt-3 border-t border-[#34435B]/40 flex items-center justify-between">
+            <span>Runtime:</span>
+            <span className="text-slate-200 font-mono font-semibold">{health?.system.nodeVersion || 'v20+'}</span>
+          </div>
+        </div>
+
+        {/* Host Platform */}
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card flex flex-col justify-between">
+          <div>
+            <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">Host Platform</div>
+            <div className="text-3xl font-extrabold text-white capitalize font-sans">
+              {health?.system.platform || 'windows'}
+            </div>
+            <div className="text-xs text-slate-400 mt-2">
+              Free RAM: <span className="text-slate-300 font-mono font-semibold">{health?.system.freeMemMb || 0} MB</span>
+            </div>
+          </div>
+          <div className="text-xs text-slate-400 mt-3 pt-3 border-t border-[#34435B]/40 flex items-center justify-between">
+            <span>CPU Cores:</span>
+            <span className="text-[#65DDA5] font-mono font-bold">{health?.system.cpuCount || 0} cores</span>
           </div>
         </div>
       </div>
@@ -135,33 +178,33 @@ export const HealthPage: React.FC = () => {
       {/* Infrastructure Details */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Database Diagnostic Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <Database className="w-5 h-5 text-indigo-400" />
-              <h3 className="text-sm font-semibold text-white">MongoDB Persistence Store</h3>
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#34435B]/60">
+            <div className="flex items-center gap-2.5">
+              <Database className="w-5 h-5 text-[#5379F5]" />
+              <h3 className="text-sm font-bold text-white">MongoDB Persistence Store</h3>
             </div>
-            <Badge variant={health?.infrastructure.database.isConnected ? 'success' : 'warning'} size="sm">
-              {health?.infrastructure.database.isConnected ? 'CONNECTED' : 'IN-MEMORY STORE'}
+            <Badge variant={isMongoLive ? 'success' : 'warning'} size="sm" dot>
+              {isMongoLive ? 'CONNECTED' : 'IN-MEMORY STORE'}
             </Badge>
           </div>
 
-          <div className="space-y-2 text-xs font-mono">
-            <div className="flex justify-between p-2 rounded-lg bg-slate-950">
+          <div className="space-y-2.5 text-xs font-mono">
+            <div className="flex justify-between items-center p-2.5 rounded-xl bg-[#141F30] border border-[#34435B]/40">
               <span className="text-slate-400">Mode:</span>
-              <span className="text-slate-200">{health?.infrastructure.database.mode}</span>
+              <span className="text-slate-200 font-semibold">{health?.infrastructure.database.mode}</span>
             </div>
-            <div className="flex justify-between p-2 rounded-lg bg-slate-950">
+            <div className="flex justify-between items-center p-2.5 rounded-xl bg-[#141F30] border border-[#34435B]/40">
               <span className="text-slate-400">Host:</span>
-              <span className="text-slate-200">{health?.infrastructure.database.host || '127.0.0.1 (local)'}</span>
+              <span className="text-slate-200 font-semibold">{health?.infrastructure.database.host || '127.0.0.1 (local)'}</span>
             </div>
-            <div className="flex justify-between p-2 rounded-lg bg-slate-950">
+            <div className="flex justify-between items-center p-2.5 rounded-xl bg-[#141F30] border border-[#34435B]/40">
               <span className="text-slate-400">Database Name:</span>
-              <span className="text-indigo-300">{health?.infrastructure.database.databaseName || 'forma_task8'}</span>
+              <span className="text-[#A99CFB] font-bold">{health?.infrastructure.database.databaseName || 'forma_task8'}</span>
             </div>
-            <div className="flex justify-between p-2 rounded-lg bg-slate-950">
+            <div className="flex justify-between items-center p-2.5 rounded-xl bg-[#141F30] border border-[#34435B]/40">
               <span className="text-slate-400">Persistence Guaranteed:</span>
-              <span className={health?.infrastructure.database.isPersistent ? 'text-emerald-400' : 'text-amber-400'}>
+              <span className={health?.infrastructure.database.isPersistent ? 'text-[#65DDA5] font-bold' : 'text-[#F5B94C] font-bold'}>
                 {health?.infrastructure.database.isPersistent ? 'YES (Disk/Atlas)' : 'NON-PERSISTENT (Fallback)'}
               </span>
             </div>
@@ -169,31 +212,33 @@ export const HealthPage: React.FC = () => {
         </div>
 
         {/* Redis Diagnostic Card */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <Cpu className="w-5 h-5 text-indigo-400" />
-              <h3 className="text-sm font-semibold text-white">Redis & Task Queue Engine</h3>
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#34435B]/60">
+            <div className="flex items-center gap-2.5">
+              <Cpu className="w-5 h-5 text-[#6257F5]" />
+              <h3 className="text-sm font-bold text-white">Redis & Task Queue Engine</h3>
             </div>
-            <Badge variant={health?.infrastructure.redis.isConnected ? 'success' : 'warning'} size="sm">
-              {health?.infrastructure.redis.isConnected ? 'CONNECTED' : 'IN-MEMORY FALLBACK'}
+            <Badge variant={isRedisLive ? 'success' : 'warning'} size="sm" dot>
+              {isRedisLive ? 'CONNECTED' : 'IN-MEMORY FALLBACK'}
             </Badge>
           </div>
 
-          <div className="space-y-2 text-xs font-mono">
-            <div className="flex justify-between p-2 rounded-lg bg-slate-950">
+          <div className="space-y-2.5 text-xs font-mono">
+            <div className="flex justify-between items-center p-2.5 rounded-xl bg-[#141F30] border border-[#34435B]/40">
               <span className="text-slate-400">Engine Mode:</span>
-              <span className="text-slate-200">{health?.infrastructure.redis.mode}</span>
+              <span className="text-slate-200 font-semibold">{health?.infrastructure.redis.mode}</span>
             </div>
-            <div className="flex justify-between p-2 rounded-lg bg-slate-950">
+            <div className="flex justify-between items-center p-2.5 rounded-xl bg-[#141F30] border border-[#34435B]/40">
               <span className="text-slate-400">Configured Host:Port:</span>
-              <span className="text-slate-200">{health?.infrastructure.redis.host}:{health?.infrastructure.redis.port}</span>
+              <span className="text-slate-200 font-semibold">{health?.infrastructure.redis.host}:{health?.infrastructure.redis.port}</span>
             </div>
-            <div className="flex justify-between p-2 rounded-lg bg-slate-950">
+            <div className="flex justify-between items-center p-2.5 rounded-xl bg-[#141F30] border border-[#34435B]/40">
               <span className="text-slate-400">Roundtrip Latency:</span>
-              <span className="text-emerald-400">{health?.infrastructure.redis.latencyMs !== null ? `${health?.infrastructure.redis.latencyMs}ms` : 'N/A (Memory)'}</span>
+              <span className="text-[#65DDA5] font-bold">
+                {health?.infrastructure.redis.latencyMs !== null ? `${health?.infrastructure.redis.latencyMs}ms` : 'N/A (Memory)'}
+              </span>
             </div>
-            <div className="flex justify-between p-2 rounded-lg bg-slate-950">
+            <div className="flex justify-between items-center p-2.5 rounded-xl bg-[#141F30] border border-[#34435B]/40">
               <span className="text-slate-400">Diagnostic Note:</span>
               <span className="text-slate-300 truncate max-w-[240px]" title={health?.infrastructure.redis.error || 'Ready'}>
                 {health?.infrastructure.redis.error || 'Operational'}
@@ -204,35 +249,47 @@ export const HealthPage: React.FC = () => {
       </div>
 
       {/* Windows Local Infrastructure Guide */}
-      <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6">
-        <h3 className="text-sm font-semibold text-white mb-2 flex items-center gap-2">
-          <Terminal className="w-4 h-4 text-indigo-400" />
+      <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-6 shadow-card">
+        <h3 className="text-sm font-bold text-white mb-2 flex items-center gap-2">
+          <Terminal className="w-4 h-4 text-[#6257F5]" />
           Windows Infrastructure Setup Guide (Optional Local Services)
         </h3>
-        <p className="text-xs text-slate-400 mb-4">
+        <p className="text-xs text-slate-400 mb-4 leading-relaxed">
           The application automatically operates in documented development fallback mode if Redis or MongoDB is offline.
-          To run native external Redis or MongoDB instances on Windows, run the following PowerShell commands:
+          To run native external Redis or MongoDB instances on Windows, execute the following commands in PowerShell:
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono">
-            <div className="text-indigo-400 font-bold mb-2">Option A: Native Redis on Windows</div>
+          <div className="bg-[#141F30] p-4 rounded-xl border border-[#34435B] text-xs font-mono">
+            <div className="text-[#A99CFB] font-bold mb-2">Option A: Native Redis on Windows</div>
             <div className="text-slate-400 mb-1"># Install Redis via Windows Package Manager:</div>
-            <div className="text-slate-200 select-all mb-2">winget install Redis.Redis</div>
+            <div className="text-slate-200 select-all mb-2 bg-[#1D2A3D] p-2 rounded border border-[#34435B]/50">
+              winget install Redis.Redis
+            </div>
             <div className="text-slate-400 mb-1"># Or install Memurai Developer (Redis 7 compatible):</div>
-            <div className="text-slate-200 select-all mb-2">winget install Memurai.MemuraiDeveloper</div>
+            <div className="text-slate-200 select-all mb-2 bg-[#1D2A3D] p-2 rounded border border-[#34435B]/50">
+              winget install Memurai.MemuraiDeveloper
+            </div>
             <div className="text-slate-400 mb-1"># Verify listening port:</div>
-            <div className="text-slate-200 select-all">Test-NetConnection -ComputerName 127.0.0.1 -Port 6379</div>
+            <div className="text-slate-200 select-all bg-[#1D2A3D] p-2 rounded border border-[#34435B]/50">
+              Test-NetConnection -ComputerName 127.0.0.1 -Port 6379
+            </div>
           </div>
 
-          <div className="bg-slate-950 p-4 rounded-xl border border-slate-800 text-xs font-mono">
-            <div className="text-indigo-400 font-bold mb-2">Option B: Docker Compose (All-In-One)</div>
+          <div className="bg-[#141F30] p-4 rounded-xl border border-[#34435B] text-xs font-mono">
+            <div className="text-[#5379F5] font-bold mb-2">Option B: Docker Compose (All-In-One)</div>
             <div className="text-slate-400 mb-1"># From Task-8/ root directory:</div>
-            <div className="text-slate-200 select-all mb-2">docker compose up -d</div>
+            <div className="text-slate-200 select-all mb-2 bg-[#1D2A3D] p-2 rounded border border-[#34435B]/50">
+              docker compose up -d
+            </div>
             <div className="text-slate-400 mb-1"># Check running containers:</div>
-            <div className="text-slate-200 select-all mb-2">docker ps</div>
+            <div className="text-slate-200 select-all mb-2 bg-[#1D2A3D] p-2 rounded border border-[#34435B]/50">
+              docker ps
+            </div>
             <div className="text-slate-400 mb-1"># To stop containers:</div>
-            <div className="text-slate-200 select-all">docker compose down</div>
+            <div className="text-slate-200 select-all bg-[#1D2A3D] p-2 rounded border border-[#34435B]/50">
+              docker compose down
+            </div>
           </div>
         </div>
       </div>

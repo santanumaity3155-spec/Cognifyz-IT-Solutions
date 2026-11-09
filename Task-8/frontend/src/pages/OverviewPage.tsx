@@ -9,14 +9,21 @@ import {
   ArrowRight,
   Clock,
   CheckCircle,
+  TrendingUp,
+  Database,
+  Radio,
+  Server,
 } from 'lucide-react';
 import StatCard from '../components/common/StatCard';
 import Badge from '../components/common/Badge';
+import LatencyAreaChart from '../components/charts/LatencyAreaChart';
+import StatusDistributionChart from '../components/charts/StatusDistributionChart';
 import {
   fetchMiddlewareTelemetry,
   fetchQueueStats,
   fetchCacheStats,
   fetchJobs,
+  fetchHealth,
   enqueueEmailJob,
   enqueueReportJob,
 } from '../services/api';
@@ -25,6 +32,7 @@ import type {
   QueueDiagnostics,
   CacheStats,
   BackgroundJob,
+  SystemHealth,
 } from '../types';
 
 export const OverviewPage: React.FC = () => {
@@ -33,20 +41,23 @@ export const OverviewPage: React.FC = () => {
   const [queueStats, setQueueStats] = useState<QueueDiagnostics | null>(null);
   const [cacheStats, setCacheStats] = useState<CacheStats | null>(null);
   const [recentJobs, setRecentJobs] = useState<BackgroundJob[]>([]);
+  const [health, setHealth] = useState<SystemHealth | null>(null);
   const [actionMessage, setActionMessage] = useState<string | null>(null);
 
   const loadData = async () => {
     try {
-      const [tel, qStats, cStats, jobsData] = await Promise.all([
+      const [tel, qStats, cStats, jobsData, healthData] = await Promise.all([
         fetchMiddlewareTelemetry(),
         fetchQueueStats(),
         fetchCacheStats(),
-        fetchJobs({ limit: 5 }),
+        fetchJobs({ limit: 6 }),
+        fetchHealth().catch(() => null),
       ]);
       setTelemetry(tel);
       setQueueStats(qStats);
       setCacheStats(cStats);
       setRecentJobs(jobsData.jobs);
+      if (healthData) setHealth(healthData);
     } catch (err) {
       console.error('Failed to load dashboard overview data:', err);
     }
@@ -54,7 +65,7 @@ export const OverviewPage: React.FC = () => {
 
   useEffect(() => {
     loadData();
-    const interval = setInterval(loadData, 5000);
+    const interval = setInterval(loadData, 10000);
     return () => clearInterval(interval);
   }, []);
 
@@ -110,125 +121,202 @@ export const OverviewPage: React.FC = () => {
     return <Badge variant="success" size="sm">{code}</Badge>;
   };
 
-  return (
-    <div className="space-y-6 min-w-0 max-w-full">
-      {/* Top Banner */}
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 bg-gradient-to-r from-slate-900 via-indigo-950/40 to-slate-900 p-6 rounded-2xl border border-slate-800">
-        <div>
-          <h2 className="text-xl font-bold text-white tracking-tight">Forma Server Intelligence Dashboard</h2>
-          <p className="text-sm text-slate-400 mt-1">
-            Real-time server telemetry, background queue workers, and server-side cache monitoring.
-          </p>
-        </div>
+  // Accurate infrastructure states derived directly from real backend
+  const isRedisLive = Boolean(health?.infrastructure?.redis?.isConnected);
+  const isMongoLive = Boolean(health?.infrastructure?.database?.isConnected);
+  const isBullMQLive = queueStats?.mode === 'redis_bullmq' && queueStats?.isRedisConnected;
+  const isCacheRedisLive = cacheStats?.mode === 'redis' && cacheStats?.isRedisConnected;
 
-        <div className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={handleQuickEmail}
-            className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-indigo-600 hover:bg-indigo-500 text-white shadow-md shadow-indigo-600/30 transition flex items-center gap-1.5"
-          >
-            <Zap className="w-3.5 h-3.5" />
-            Dispatch Email Job
-          </button>
-          <button
-            onClick={handleQuickReport}
-            className="px-3.5 py-2 text-xs font-semibold rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 border border-slate-700 transition flex items-center gap-1.5"
-          >
-            <Activity className="w-3.5 h-3.5" />
-            Dispatch Report Job
-          </button>
+  return (
+    <div className="space-y-6 sm:space-y-7 min-w-0 max-w-full font-sans">
+      {/* Top Welcome Hero Banner */}
+      <div className="relative overflow-hidden bg-gradient-to-r from-[#172235] via-[#1D2A3D] to-[#172235] p-5 sm:p-7 rounded-2xl border border-[#34435B] shadow-card">
+        <div className="relative z-10 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-5">
+          <div className="max-w-2xl">
+            <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-[#6257F5]/15 border border-[#6257F5]/30 text-[11px] font-bold text-[#A99CFB] mb-2.5">
+              <span className="w-1.5 h-1.5 rounded-full bg-[#65DDA5] animate-pulse" />
+              Real-Time Server Telemetry Active
+            </div>
+            <h2 className="text-xl sm:text-2xl font-extrabold text-white tracking-tight leading-snug">
+              Forma Server Intelligence Dashboard
+            </h2>
+            <p className="text-xs sm:text-sm text-slate-300 mt-1 leading-relaxed">
+              Real-time server telemetry, asynchronous background queue workers, and server-side cache monitoring.
+            </p>
+          </div>
+
+          {/* Quick Action Dispatch Buttons */}
+          <div className="flex flex-wrap items-center gap-2.5 flex-shrink-0">
+            <button
+              onClick={handleQuickEmail}
+              className="px-4 py-2.5 text-xs font-bold rounded-xl bg-[#6257F5] hover:bg-[#5346EE] text-white shadow-lg shadow-[#6257F5]/30 transition-all flex items-center gap-2 transform active:scale-95"
+            >
+              <Zap className="w-4 h-4 text-[#A99CFB]" />
+              Dispatch Email Job
+            </button>
+            <button
+              onClick={handleQuickReport}
+              className="px-4 py-2.5 text-xs font-bold rounded-xl bg-[#223249] hover:bg-[#283A54] text-slate-200 border border-[#34435B] shadow-sm transition-all flex items-center gap-2 transform active:scale-95"
+            >
+              <Activity className="w-4 h-4 text-[#5379F5]" />
+              Dispatch Report Job
+            </button>
+          </div>
         </div>
       </div>
 
       {actionMessage && (
-        <div className="p-3 bg-indigo-500/10 border border-indigo-500/30 rounded-xl text-xs text-indigo-300 flex items-center gap-2 animate-fadeIn">
-          <CheckCircle className="w-4 h-4 text-indigo-400 flex-shrink-0" />
-          <span>{actionMessage}</span>
+        <div className="p-3.5 bg-[#6257F5]/10 border border-[#6257F5]/30 rounded-xl text-xs text-[#A99CFB] flex items-center gap-2.5 animate-fadeIn">
+          <CheckCircle className="w-4 h-4 text-[#65DDA5] flex-shrink-0" />
+          <span className="font-semibold">{actionMessage}</span>
         </div>
       )}
 
-      {/* KPI Stats Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      {/* 4 Statistics KPI Cards Grid - Full Width, Consistent Height, Zero Text Clipping */}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-5">
         <StatCard
           title="Total API Requests"
           value={telemetry?.summary.totalRequests ?? 0}
           subtitle={`Buffer size: ${telemetry?.summary.bufferSize ?? 0} requests`}
-          icon={<ShieldCheck className="w-5 h-5" />}
+          icon={<ShieldCheck className="w-5 h-5 text-[#5379F5]" />}
           badge="Live Middleware"
           badgeColor="blue"
+          trend="100% Captured"
+          trendPositive={true}
         />
 
         <StatCard
           title="Avg Latency"
           value={`${telemetry?.summary.avgDurationMs ?? 0}ms`}
           subtitle={`P95: ${telemetry?.summary.p95DurationMs ?? 0}ms`}
-          icon={<Clock className="w-5 h-5" />}
+          icon={<Clock className="w-5 h-5 text-[#65DDA5]" />}
           badge="High-Res Timer"
           badgeColor="green"
+          trend="hrtime precision"
+          trendPositive={true}
         />
 
         <StatCard
           title="Background Jobs"
           value={queueStats?.counts.total ?? 0}
-          subtitle={`${queueStats?.counts.completed ?? 0} completed / ${queueStats?.counts.failed ?? 0} failed`}
-          icon={<Layers className="w-5 h-5" />}
+          subtitle={`${queueStats?.counts.completed ?? 0} completed · ${queueStats?.counts.failed ?? 0} failed`}
+          icon={<Layers className="w-5 h-5 text-[#F5B94C]" />}
           badge={queueStats?.mode === 'redis_bullmq' ? 'Redis BullMQ' : 'Async Fallback'}
           badgeColor={queueStats?.isRedisConnected ? 'green' : 'amber'}
+          trend={`${queueStats?.counts.active ?? 0} active`}
         />
 
         <StatCard
           title="Cache Hit Ratio"
           value={cacheStats?.hitRatio ?? '0.0%'}
-          subtitle={`${cacheStats?.hits ?? 0} hits / ${cacheStats?.misses ?? 0} misses`}
-          icon={<Cpu className="w-5 h-5" />}
+          subtitle={`${cacheStats?.hits ?? 0} hits · ${cacheStats?.misses ?? 0} misses`}
+          icon={<Cpu className="w-5 h-5 text-[#A99CFB]" />}
           badge={`${cacheStats?.activeKeysCount ?? 0} Keys`}
           badgeColor="purple"
+          trend={cacheStats?.mode === 'redis' ? 'Redis' : 'Memory'}
+          trendPositive={true}
         />
       </div>
 
-      {/* Two Columns: Recent Jobs & Recent API Requests */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Jobs */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+      {/* Visual Telemetry & Analytics Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Latency Stream Chart (2 Cols) */}
+        <div className="lg:col-span-2 bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3 pb-3 border-b border-[#34435B]/50">
             <div className="flex items-center gap-2">
-              <Layers className="w-4 h-4 text-indigo-400" />
-              <h3 className="text-sm font-semibold text-white">Recent Background Jobs</h3>
+              <TrendingUp className="w-4 h-4 text-[#6257F5]" />
+              <h3 className="text-sm font-bold text-white tracking-tight">
+                Live Request Latency Trend
+              </h3>
+            </div>
+            <span className="text-[11px] text-slate-400 font-mono">
+              High-Resolution Nanosecond hrtime
+            </span>
+          </div>
+
+          <div className="flex-1 py-1">
+            <LatencyAreaChart
+              requests={telemetry?.recentRequests || []}
+              avgLatency={telemetry?.summary.avgDurationMs}
+            />
+          </div>
+        </div>
+
+        {/* Status Distribution Chart (1 Col) */}
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card flex flex-col justify-between">
+          <div className="flex items-center justify-between mb-3 pb-3 border-b border-[#34435B]/50">
+            <div className="flex items-center gap-2">
+              <Radio className="w-4 h-4 text-[#65DDA5]" />
+              <h3 className="text-sm font-bold text-white tracking-tight">
+                Response Status Distribution
+              </h3>
+            </div>
+            <span className="text-[11px] text-slate-400 font-mono">
+              Total: {telemetry?.summary.totalRequests ?? 0}
+            </span>
+          </div>
+
+          <div className="py-2 flex-1 flex flex-col justify-center">
+            <StatusDistributionChart
+              statusCounts={telemetry?.summary.statusCounts || { '2xx': 0, '3xx': 0, '4xx': 0, '5xx': 0 }}
+            />
+          </div>
+
+          <div className="pt-3 border-t border-[#34435B]/40 text-xs text-slate-400 flex items-center justify-between">
+            <span>Client errors (4xx): <strong className="text-[#F5B94C] font-mono">{telemetry?.summary.statusCounts['4xx'] ?? 0}</strong></span>
+            <span>Server errors (5xx): <strong className="text-[#F16C80] font-mono">{telemetry?.summary.statusCounts['5xx'] ?? 0}</strong></span>
+          </div>
+        </div>
+      </div>
+
+      {/* Two Columns: Recent Jobs & Live Request Stream (Clean layout without nested scroll clipping) */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Recent Background Jobs */}
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card flex flex-col">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#34435B]/60">
+            <div className="flex items-center gap-2">
+              <Layers className="w-4 h-4 text-[#6257F5]" />
+              <h3 className="text-sm font-bold text-white">Recent Background Jobs</h3>
             </div>
             <button
               onClick={() => navigate('/jobs')}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1"
+              className="text-xs text-[#A99CFB] hover:text-white font-semibold flex items-center gap-1 transition"
             >
               View Hub <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="space-y-3 flex-1 overflow-y-auto max-h-[340px]">
+          <div className="space-y-2.5 flex-1">
             {recentJobs.length === 0 ? (
-              <div className="text-center py-8 text-xs text-slate-500">
+              <div className="text-center py-10 text-xs text-slate-400">
                 No jobs processed yet. Click &apos;Dispatch Email Job&apos; above!
               </div>
             ) : (
-              recentJobs.map((job) => (
+              recentJobs.slice(0, 5).map((job) => (
                 <div
                   key={job.jobId}
-                  className="p-3 rounded-xl bg-slate-800/60 border border-slate-700/60 hover:border-slate-600 transition"
+                  className="p-3.5 rounded-xl bg-[#172235]/80 border border-[#34435B]/60 hover:border-[#6257F5]/40 transition"
                 >
                   <div className="flex items-center justify-between mb-1.5">
-                    <span className="text-xs font-mono font-medium text-slate-200 truncate max-w-[200px]">
+                    <span className="text-xs font-mono font-bold text-slate-200 truncate max-w-[200px]" title={job.jobId}>
                       {job.jobId}
                     </span>
                     {getStatusBadge(job.status)}
                   </div>
 
-                  <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span className="capitalize">{job.queueName.replace('Queue', '')} &bull; {job.jobType}</span>
-                    <span>{job.processingTimeMs ? `${job.processingTimeMs}ms` : `${job.progress}%`}</span>
+                  <div className="flex items-center justify-between text-xs text-slate-400 font-sans">
+                    <span className="capitalize font-medium text-slate-300">
+                      {job.queueName.replace('Queue', '')} &bull; {job.jobType}
+                    </span>
+                    <span className="font-mono">
+                      {job.processingTimeMs ? `${job.processingTimeMs}ms` : `${job.progress}%`}
+                    </span>
                   </div>
 
                   {job.status === 'active' && (
-                    <div className="w-full bg-slate-700 h-1 rounded-full mt-2 overflow-hidden">
+                    <div className="w-full bg-[#1B2638] h-1.5 rounded-full mt-2.5 overflow-hidden">
                       <div
-                        className="bg-indigo-500 h-full transition-all duration-300"
+                        className="bg-[#6257F5] h-full transition-all duration-300 shadow-glow-purple"
                         style={{ width: `${job.progress}%` }}
                       />
                     </div>
@@ -239,42 +327,126 @@ export const OverviewPage: React.FC = () => {
           </div>
         </div>
 
-        {/* Live Requests Stream */}
-        <div className="bg-slate-900 border border-slate-800 rounded-2xl p-5 flex flex-col">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-800">
+        {/* Live Request Stream */}
+        <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 shadow-card flex flex-col">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-[#34435B]/60">
             <div className="flex items-center gap-2">
-              <ShieldCheck className="w-4 h-4 text-indigo-400" />
-              <h3 className="text-sm font-semibold text-white">Live Request Stream</h3>
+              <ShieldCheck className="w-4 h-4 text-[#5379F5]" />
+              <h3 className="text-sm font-bold text-white">Live Request Stream</h3>
             </div>
             <button
               onClick={() => navigate('/middleware')}
-              className="text-xs text-indigo-400 hover:text-indigo-300 font-medium flex items-center gap-1"
+              className="text-xs text-[#7DA4F8] hover:text-white font-semibold flex items-center gap-1 transition"
             >
               Inspect All <ArrowRight className="w-3.5 h-3.5" />
             </button>
           </div>
 
-          <div className="space-y-2 flex-1 overflow-y-auto max-h-[340px]">
+          <div className="space-y-2 flex-1">
             {telemetry?.recentRequests.length === 0 ? (
-              <div className="text-center py-8 text-xs text-slate-500">No requests recorded yet.</div>
+              <div className="text-center py-10 text-xs text-slate-400">No requests recorded yet.</div>
             ) : (
-              telemetry?.recentRequests.slice(0, 7).map((req) => (
+              telemetry?.recentRequests.slice(0, 6).map((req) => (
                 <div
                   key={req.id + req.timestamp}
-                  className="flex items-center justify-between p-2.5 rounded-xl bg-slate-800/40 border border-slate-800 text-xs font-mono"
+                  className="flex items-center justify-between p-2.5 rounded-xl bg-[#172235]/80 border border-[#34435B]/50 text-xs font-mono hover:bg-[#202E42] transition"
                 >
                   <div className="flex items-center gap-2.5 truncate max-w-[280px]">
-                    <span className="font-bold text-slate-300">{req.method}</span>
-                    <span className="text-slate-400 truncate">{req.path}</span>
+                    <span className="font-bold text-white px-1.5 py-0.5 rounded bg-[#223249]">
+                      {req.method}
+                    </span>
+                    <span className="text-slate-300 truncate">{req.path}</span>
                   </div>
 
-                  <div className="flex items-center gap-2">
+                  <div className="flex items-center gap-2.5">
                     <span className="text-slate-400 text-[11px]">{req.durationMs}ms</span>
                     {getStatusCodeBadge(req.status)}
                   </div>
                 </div>
               ))
             )}
+          </div>
+        </div>
+      </div>
+
+      {/* Infrastructure Summary Panel: Consistent, Accurate Statuses with Zero Conflicts */}
+      <div className="bg-[#1D2A3D] border border-[#34435B] rounded-2xl p-5 sm:p-6 shadow-card">
+        <h3 className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-4 flex items-center gap-2">
+          <Server className="w-4 h-4 text-[#6257F5]" />
+          Infrastructure Summary & Verified Telemetry
+        </h3>
+
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          {/* MongoDB Persistence */}
+          <div className="p-4 rounded-xl bg-[#172235] border border-[#34435B]/60 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#5379F5]/10 text-[#5379F5]">
+                <Database className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">MongoDB Store</div>
+                <div className="text-xs font-bold text-white mt-0.5 font-mono">
+                  {isMongoLive ? (health?.infrastructure?.database?.databaseName || 'forma_task8') : 'In-Memory Store'}
+                </div>
+              </div>
+            </div>
+            <Badge variant={isMongoLive ? 'success' : 'warning'} size="sm" dot>
+              {isMongoLive ? 'Connected' : 'Fallback'}
+            </Badge>
+          </div>
+
+          {/* Redis Server (6379) */}
+          <div className="p-4 rounded-xl bg-[#172235] border border-[#34435B]/60 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#6257F5]/10 text-[#6257F5]">
+                <Cpu className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Redis (Port 6379)</div>
+                <div className="text-xs font-bold text-white mt-0.5 font-mono">
+                  {isRedisLive ? 'Redis 127.0.0.1' : 'Disconnected'}
+                </div>
+              </div>
+            </div>
+            <Badge variant={isRedisLive ? 'success' : 'error'} size="sm" dot>
+              {isRedisLive ? 'Connected' : 'Offline'}
+            </Badge>
+          </div>
+
+          {/* Queue Engine (BullMQ vs Async Fallback) */}
+          <div className="p-4 rounded-xl bg-[#172235] border border-[#34435B]/60 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#F5B94C]/10 text-[#F5B94C]">
+                <Layers className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Queue Engine</div>
+                <div className="text-xs font-bold text-white mt-0.5 font-mono">
+                  {isBullMQLive ? 'BullMQ Distributed' : 'Async Queue'}
+                </div>
+              </div>
+            </div>
+            <Badge variant={isBullMQLive ? 'success' : 'warning'} size="sm" dot>
+              {isBullMQLive ? 'BullMQ Active' : 'Async Fallback'}
+            </Badge>
+          </div>
+
+          {/* Cache Layer (Redis Cache vs In-Memory Store) */}
+          <div className="p-4 rounded-xl bg-[#172235] border border-[#34435B]/60 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 rounded-lg bg-[#65DDA5]/10 text-[#65DDA5]">
+                <Zap className="w-4 h-4" />
+              </div>
+              <div>
+                <div className="text-[11px] text-slate-400 uppercase font-bold tracking-wider">Cache Layer</div>
+                <div className="text-xs font-bold text-white mt-0.5 font-mono">
+                  {isCacheRedisLive ? 'Redis Cache' : 'In-Memory Cache'}
+                </div>
+              </div>
+            </div>
+            <Badge variant={isCacheRedisLive ? 'success' : 'warning'} size="sm" dot>
+              {isCacheRedisLive ? 'Redis Live' : 'Memory Fallback'}
+            </Badge>
           </div>
         </div>
       </div>
