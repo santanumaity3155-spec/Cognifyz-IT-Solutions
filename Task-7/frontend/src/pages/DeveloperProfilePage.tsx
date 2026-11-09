@@ -1,80 +1,117 @@
 import React from 'react';
-import { UserCheck, Github, ExternalLink } from 'lucide-react';
+import { RotateCcw, Github, Clock, ShieldCheck } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.tsx';
+import { useGitHubProfile } from '../hooks/useGitHubData.ts';
 import Card from '../components/common/Card.tsx';
 import Button from '../components/common/Button.tsx';
 import Badge from '../components/common/Badge.tsx';
+import ErrorAlert from '../components/common/ErrorAlert.tsx';
 import githubService from '../services/githubService.ts';
+import GitHubProfileCard from '../components/github/GitHubProfileCard.tsx';
 
 export const DeveloperProfilePage: React.FC = () => {
-  const { githubStatus } = useAuth();
+  const { githubStatus, githubLoading } = useAuth();
   const isConnected = Boolean(githubStatus?.connected);
+
+  const {
+    profile,
+    rateLimit,
+    loading,
+    error,
+    isCached,
+    cachedAt,
+    refresh,
+  } = useGitHubProfile({ autoFetch: isConnected });
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-900">Developer Profile</h1>
           <p className="text-sm text-slate-500 mt-1">
-            Student developer intelligence, programming language breakdown, and public profile metrics.
+            Real-time developer intelligence, GitHub REST API analytics, and repository counts.
           </p>
         </div>
-        <Badge variant="brand" size="md">
-          Phase 8 Foundation
-        </Badge>
+
+        {isConnected && (
+          <div className="flex items-center gap-2">
+            {isCached && (
+              <Badge variant="neutral" size="sm" dot>
+                <Clock className="w-3 h-3 text-slate-400 mr-1" />
+                Cached {cachedAt ? new Date(cachedAt).toLocaleTimeString() : 'Recently'}
+              </Badge>
+            )}
+            <Button
+              variant="outline"
+              size="sm"
+              leftIcon={<RotateCcw className="w-3.5 h-3.5" />}
+              onClick={refresh}
+              isLoading={loading}
+              title="Bypass server cache and fetch fresh GitHub API profile"
+            >
+              Refresh Profile
+            </Button>
+          </div>
+        )}
       </div>
 
-      {isConnected ? (
-        <Card
-          title={`GitHub Identity: @${githubStatus?.username}`}
-          subtitle="Connected via OAuth 2.0 Authorization Code flow"
-          headerAction={
-            githubStatus?.profileUrl && (
-              <a
-                href={githubStatus.profileUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-flex items-center gap-1 text-xs text-brand-600 hover:text-brand-700 font-semibold"
-              >
-                <span>Open on GitHub</span>
-                <ExternalLink className="w-3.5 h-3.5" />
-              </a>
-            )
-          }
-        >
-          <div className="flex items-center gap-4 p-4 rounded-xl bg-slate-50 border border-slate-200">
-            {githubStatus?.avatarUrl ? (
-              <img
-                src={githubStatus.avatarUrl}
-                alt={githubStatus.username}
-                className="w-16 h-16 rounded-full border-2 border-brand-500 shadow-sm"
-              />
-            ) : (
-              <div className="w-16 h-16 rounded-full bg-slate-200 flex items-center justify-center text-slate-600">
-                <Github className="w-8 h-8" />
-              </div>
-            )}
-            <div>
-              <h3 className="font-bold text-slate-900 text-lg">@{githubStatus?.username}</h3>
-              <p className="text-xs text-slate-500 mt-0.5">
-                Connected on {githubStatus?.connectedAt ? new Date(githubStatus.connectedAt).toLocaleDateString() : 'Active session'}
-              </p>
-              <div className="mt-2 inline-flex items-center gap-2">
-                <Badge variant="success" size="sm">
-                  Scopes: {githubStatus?.scopes?.join(', ') || 'read:user'}
-                </Badge>
-              </div>
-            </div>
-          </div>
+      {error && (
+        <ErrorAlert
+          title="Profile Fetch Error"
+          message={error}
+          onRetry={refresh}
+        />
+      )}
 
-          <div className="mt-6 p-4 rounded-xl border border-dashed border-slate-300 text-center py-8">
-            <UserCheck className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-            <h4 className="text-sm font-semibold text-slate-700">Developer Analytics Module Ready</h4>
-            <p className="text-xs text-slate-500 max-w-md mx-auto mt-1">
-              Phase 8 frontend foundation connected. Full interactive profile visualization, bio inspection, and language distribution metrics will activate in Phases 9 and 10.
-            </p>
-          </div>
-        </Card>
+      {isConnected ? (
+        <div className="space-y-6">
+          {/* Real Live Profile Card */}
+          <GitHubProfileCard profile={profile} isLoading={loading || githubLoading} />
+
+          {/* Operational Diagnostics & Rate Limit Allowance */}
+          {rateLimit && (
+            <Card title="API Rate Limit & Session Metadata">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs">
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                    Hourly Quota Remaining
+                  </span>
+                  <span className="text-xl font-bold font-mono text-brand-600 mt-1 block">
+                    {rateLimit.remaining} / {rateLimit.limit}
+                  </span>
+                  <span className="text-[11px] text-slate-400 mt-0.5 block">
+                    Resets in {Math.ceil(rateLimit.resetInSeconds / 60)} minutes
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                    Security Layer
+                  </span>
+                  <span className="text-xs font-bold text-slate-800 mt-1 flex items-center gap-1.5">
+                    <ShieldCheck className="w-4 h-4 text-emerald-600" />
+                    AES-256-GCM Encrypted
+                  </span>
+                  <span className="text-[11px] text-slate-400 mt-0.5 block">
+                    Tokens never transmitted to frontend
+                  </span>
+                </div>
+
+                <div className="p-3 rounded-xl bg-slate-50 border border-slate-200">
+                  <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block">
+                    Scope Level
+                  </span>
+                  <span className="text-xs font-mono font-bold text-slate-800 mt-1 block">
+                    {githubStatus?.scopes?.join(', ') || 'read:user'}
+                  </span>
+                  <span className="text-[11px] text-slate-400 mt-0.5 block">
+                    Least-privilege authorization
+                  </span>
+                </div>
+              </div>
+            </Card>
+          )}
+        </div>
       ) : (
         <Card>
           <div className="text-center py-12">

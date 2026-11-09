@@ -1,39 +1,15 @@
 import React, { useEffect, useState, useCallback } from 'react';
-import { Server, Database, ShieldCheck, RotateCcw, Clock } from 'lucide-react';
-import api from '../services/api.ts';
+import { Server, Database, ShieldCheck, RotateCcw, Clock, AlertTriangle } from 'lucide-react';
+import githubService from '../services/githubService.ts';
 import Card from '../components/common/Card.tsx';
 import Button from '../components/common/Button.tsx';
 import LoadingState from '../components/common/LoadingState.tsx';
 import ErrorAlert from '../components/common/ErrorAlert.tsx';
-
-interface HealthData {
-  status: string;
-  level: string;
-  task: string;
-  phase: string;
-  environment: string;
-  database: {
-    mode: string;
-    isPersistent: boolean;
-    databaseName: string;
-  };
-  oauth: {
-    configured: boolean;
-    maskedClientId: string;
-  };
-}
-
-interface RateLimitData {
-  limit: number;
-  remaining: number;
-  used: number;
-  resetDate: string;
-  resetInSeconds: number;
-}
+import { HealthApiResponse, GitHubRateLimit } from '../types/index.ts';
 
 export const ApiStatusPage: React.FC = () => {
-  const [health, setHealth] = useState<HealthData | null>(null);
-  const [rateLimit, setRateLimit] = useState<RateLimitData | null>(null);
+  const [health, setHealth] = useState<HealthApiResponse | null>(null);
+  const [rateLimit, setRateLimit] = useState<GitHubRateLimit | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -42,16 +18,16 @@ export const ApiStatusPage: React.FC = () => {
       setLoading(true);
       setError(null);
 
-      // Probe health endpoint
-      const healthRes = await api.get('/health');
-      setHealth(healthRes.data);
+      // Probe backend health endpoint
+      const healthData = await githubService.getHealth();
+      setHealth(healthData);
 
-      // Probe rate limit endpoint
+      // Probe rate limit quota endpoint
       try {
-        const rateLimitRes = await api.get('/github/rate-limit');
-        setRateLimit(rateLimitRes.data.data.rateLimit);
+        const rateLimitData = await githubService.getRateLimit();
+        setRateLimit(rateLimitData);
       } catch {
-        // Unauthenticated or not yet linked rate limit fallback
+        // Expected when user has not yet connected GitHub
         setRateLimit(null);
       }
     } catch (err: unknown) {
@@ -149,8 +125,12 @@ export const ApiStatusPage: React.FC = () => {
                 </div>
               </div>
             ) : (
-              <div className="p-6 text-center text-slate-500 text-xs sm:text-sm">
-                Connect your GitHub account to access authenticated rate-limit quota metrics (5,000 requests/hr).
+              <div className="p-6 text-center text-slate-500 text-xs sm:text-sm flex flex-col items-center">
+                <AlertTriangle className="w-8 h-8 text-amber-500 mb-2" />
+                <span className="font-semibold text-slate-700">Authenticated Rate Limit Unavailable</span>
+                <span className="text-xs text-slate-400 mt-1 max-w-sm">
+                  Connect your GitHub account to access authenticated rate-limit quota metrics (5,000 requests/hr).
+                </span>
               </div>
             )}
           </Card>
@@ -164,7 +144,7 @@ export const ApiStatusPage: React.FC = () => {
                   <span className="font-bold text-slate-800 block">Server Status</span>
                   <span className="text-xs text-slate-500 mt-0.5 block">{health?.status || 'Online'}</span>
                   <span className="text-[11px] font-mono text-emerald-700 font-semibold mt-1 block">
-                    Level 4: Expert
+                    {health?.level || 'Level 4: Expert'}
                   </span>
                 </div>
               </div>
