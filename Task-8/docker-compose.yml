@@ -1,0 +1,42 @@
+version: '3.8'
+
+services:
+  # Redis service for BullMQ queues and server-side caching
+  redis:
+    image: redis:7-alpine
+    container_name: forma-task8-redis
+    restart: unless-stopped
+    ports:
+      - "6379:6379"
+    command: redis-server --appendonly yes --requirepass ""
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  # MongoDB service for persistent application and job audit data
+  mongodb:
+    image: mongo:7.0
+    container_name: forma-task8-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: forma_task8
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:
+    driver: local
+  mongo_data:
+    driver: local
+
