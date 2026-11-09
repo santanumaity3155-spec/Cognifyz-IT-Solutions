@@ -41,7 +41,7 @@ export const DashboardPage: React.FC = () => {
         <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight">
           Forma Developer Intelligence Platform
         </h1>
-        <p className="mt-1 text-sm text-slate-600 max-w-3xl">
+        <p className="mt-1 text-xs sm:text-sm text-slate-600 max-w-3xl leading-relaxed">
           Advanced external API integration with GitHub REST API, OAuth 2.0 Authorization Code flow, tiered rate limiting, and in-memory TTL caching.
         </p>
       </div>
@@ -62,7 +62,7 @@ export const DashboardPage: React.FC = () => {
                   href={profile.profileUrl}
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-xs text-brand-600 hover:text-brand-700 font-semibold inline-flex items-center gap-1"
+                  className="text-xs text-brand-600 hover:text-brand-700 font-semibold inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded"
                 >
                   GitHub <ExternalLink className="w-3 h-3" />
                 </a>
@@ -70,19 +70,19 @@ export const DashboardPage: React.FC = () => {
             }
           >
             <div className="space-y-4">
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0">
                 {profile?.avatarUrl ? (
                   <img
                     src={profile.avatarUrl}
                     alt={profile.login}
-                    className="w-12 h-12 rounded-xl border border-slate-200 object-cover"
+                    className="w-12 h-12 rounded-xl border border-slate-200 object-cover flex-shrink-0"
                   />
                 ) : (
-                  <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold">
+                  <div className="w-12 h-12 rounded-xl bg-brand-50 text-brand-600 flex items-center justify-center font-bold flex-shrink-0">
                     {profile?.login?.slice(0, 2).toUpperCase() || 'GH'}
                   </div>
                 )}
-                <div className="min-w-0">
+                <div className="min-w-0 flex-1">
                   <h4 className="font-bold text-slate-900 text-sm truncate">
                     {profile?.name || profile?.login || 'Authenticated Developer'}
                   </h4>
@@ -93,19 +93,19 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               <div className="grid grid-cols-3 gap-2 pt-2 border-t border-slate-100 text-center">
-                <div className="p-2 rounded-lg bg-slate-50">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[10px] text-slate-400 block font-semibold uppercase">Repos</span>
                   <span className="text-sm font-extrabold text-slate-800 font-mono">
                     {profile?.publicRepos ?? '-'}
                   </span>
                 </div>
-                <div className="p-2 rounded-lg bg-slate-50">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[10px] text-slate-400 block font-semibold uppercase">Followers</span>
                   <span className="text-sm font-extrabold text-slate-800 font-mono">
                     {profile?.followers ?? '-'}
                   </span>
                 </div>
-                <div className="p-2 rounded-lg bg-slate-50">
+                <div className="p-2 rounded-xl bg-slate-50 border border-slate-100">
                   <span className="text-[10px] text-slate-400 block font-semibold uppercase">Following</span>
                   <span className="text-sm font-extrabold text-slate-800 font-mono">
                     {profile?.following ?? '-'}
@@ -122,7 +122,7 @@ export const DashboardPage: React.FC = () => {
             headerAction={
               <NavLink
                 to="/github/repositories"
-                className="text-xs text-brand-600 hover:text-brand-700 font-semibold inline-flex items-center gap-1"
+                className="text-xs text-brand-600 hover:text-brand-700 font-semibold inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded"
               >
                 Explorer <ArrowRight className="w-3 h-3" />
               </NavLink>
@@ -176,7 +176,7 @@ export const DashboardPage: React.FC = () => {
             headerAction={
               <NavLink
                 to="/api-status"
-                className="text-xs text-brand-600 hover:text-brand-700 font-semibold inline-flex items-center gap-1"
+                className="text-xs text-brand-600 hover:text-brand-700 font-semibold inline-flex items-center gap-1 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded"
               >
                 Telemetry <ArrowRight className="w-3 h-3" />
               </NavLink>
@@ -218,12 +218,12 @@ export const DashboardPage: React.FC = () => {
 
       {/* Quick Navigation Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <NavLink to="/github/profile" className="block group">
-          <Card className="h-full hover:border-brand-300 transition hover:shadow-md">
+        <NavLink to="/github/profile" className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-2xl">
+          <Card className="h-full hover:border-brand-300 transition-all duration-200 hover:shadow-md">
             <div className="w-10 h-10 rounded-xl bg-indigo-50 text-brand-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
               <UserCheck className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 group-hover:text-brand-600 transition-colors flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 group-hover:text-brand-600 transition-colors flex items-center justify-between text-base">
               Developer Profile
               <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
             </h3>
@@ -233,12 +233,12 @@ export const DashboardPage: React.FC = () => {
           </Card>
         </NavLink>
 
-        <NavLink to="/github/repositories" className="block group">
-          <Card className="h-full hover:border-brand-300 transition hover:shadow-md">
+        <NavLink to="/github/repositories" className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-2xl">
+          <Card className="h-full hover:border-brand-300 transition-all duration-200 hover:shadow-md">
             <div className="w-10 h-10 rounded-xl bg-sky-50 text-sky-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
               <FolderGit2 className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 group-hover:text-sky-600 transition-colors flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 group-hover:text-sky-600 transition-colors flex items-center justify-between text-base">
               Repository Explorer
               <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
             </h3>
@@ -248,12 +248,12 @@ export const DashboardPage: React.FC = () => {
           </Card>
         </NavLink>
 
-        <NavLink to="/api-status" className="block group">
-          <Card className="h-full hover:border-brand-300 transition hover:shadow-md">
+        <NavLink to="/api-status" className="block group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded-2xl">
+          <Card className="h-full hover:border-brand-300 transition-all duration-200 hover:shadow-md">
             <div className="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 group-hover:scale-105 transition-transform">
               <Activity className="w-5 h-5" />
             </div>
-            <h3 className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors flex items-center justify-between">
+            <h3 className="font-bold text-slate-900 group-hover:text-emerald-600 transition-colors flex items-center justify-between text-base">
               API Status & Rate Limits
               <ArrowRight className="w-4 h-4 text-slate-400 group-hover:translate-x-1 transition-transform" />
             </h3>
@@ -268,8 +268,8 @@ export const DashboardPage: React.FC = () => {
       <Card title="Task 7 Architecture Implementation Summary">
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 text-xs sm:text-sm">
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 font-semibold text-slate-900">
-              <ShieldCheck className="w-4 h-4 text-brand-600" />
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <ShieldCheck className="w-4 h-4 text-brand-600 flex-shrink-0" />
               <span>OAuth 2.0 Security</span>
             </div>
             <p className="text-slate-500 text-xs leading-relaxed">
@@ -278,8 +278,8 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 font-semibold text-slate-900">
-              <Cpu className="w-4 h-4 text-sky-600" />
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <Cpu className="w-4 h-4 text-sky-600 flex-shrink-0" />
               <span>External API Resilience</span>
             </div>
             <p className="text-slate-500 text-xs leading-relaxed">
@@ -288,8 +288,8 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           <div className="space-y-1.5">
-            <div className="flex items-center gap-2 font-semibold text-slate-900">
-              <Layers className="w-4 h-4 text-emerald-600" />
+            <div className="flex items-center gap-2 font-bold text-slate-900">
+              <Layers className="w-4 h-4 text-emerald-600 flex-shrink-0" />
               <span>Tiered Rate Limiting & Cache</span>
             </div>
             <p className="text-slate-500 text-xs leading-relaxed">

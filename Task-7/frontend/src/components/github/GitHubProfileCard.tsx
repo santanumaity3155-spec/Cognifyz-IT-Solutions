@@ -72,9 +72,9 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
 
   return (
     <Card className={`overflow-hidden ${className}`}>
-      <div className="flex flex-col md:flex-row items-start gap-6">
+      <div className="flex flex-col md:flex-row items-center md:items-start gap-6">
         {/* Avatar & Identicon Fallback */}
-        <div className="relative mx-auto md:mx-0 flex-shrink-0">
+        <div className="relative flex-shrink-0">
           <div className="w-24 h-24 sm:w-28 sm:h-28 rounded-2xl overflow-hidden border-2 border-slate-200 bg-slate-100 shadow-sm flex items-center justify-center">
             {profile.avatarUrl && !imgError ? (
               <img
@@ -92,17 +92,17 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
               </div>
             )}
           </div>
-          <span className="absolute -bottom-2 -right-2 bg-white rounded-full p-1 shadow-md border border-slate-200">
+          <span className="absolute -bottom-2 -right-2 bg-white rounded-full p-1.5 shadow-md border border-slate-200">
             <Github className="w-4 h-4 text-slate-800" />
           </span>
         </div>
 
         {/* Identity & Metadata */}
         <div className="flex-1 min-w-0 w-full text-center md:text-left space-y-4">
-          <div className="flex flex-col md:flex-row md:items-center justify-between gap-2">
-            <div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-3">
+            <div className="min-w-0">
               <div className="flex flex-wrap items-center justify-center md:justify-start gap-2">
-                <h2 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-slate-900 tracking-tight truncate">
                   {profile.name || profile.login}
                 </h2>
                 <Badge variant="brand" size="sm">
@@ -113,7 +113,7 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
                 href={profile.profileUrl || `https://github.com/${profile.login}`}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-xs sm:text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline inline-flex items-center gap-1 mt-0.5"
+                className="text-xs sm:text-sm font-medium text-brand-600 hover:text-brand-700 hover:underline inline-flex items-center gap-1 mt-0.5 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 rounded"
                 title="View on GitHub"
               >
                 @{profile.login}
@@ -125,7 +125,7 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
               href={profile.profileUrl || `https://github.com/${profile.login}`}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-medium text-slate-700 hover:bg-slate-50 transition shadow-sm mx-auto md:mx-0"
+              className="inline-flex items-center justify-center gap-1.5 px-3 py-1.5 rounded-lg border border-slate-300 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition shadow-xs mx-auto md:mx-0 flex-shrink-0 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
             >
               <Github className="w-3.5 h-3.5" />
               GitHub Profile
@@ -135,7 +135,7 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
 
           {/* Bio */}
           {profile.bio && (
-            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl">
+            <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-2xl break-words">
               {profile.bio}
             </p>
           )}
@@ -144,15 +144,15 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
           <div className="flex flex-wrap items-center justify-center md:justify-start gap-y-2 gap-x-4 text-xs text-slate-500 pt-1">
             {profile.company && (
               <span className="inline-flex items-center gap-1.5">
-                <Building className="w-3.5 h-3.5 text-slate-400" />
-                {profile.company}
+                <Building className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                <span className="truncate max-w-[180px]">{profile.company}</span>
               </span>
             )}
 
             {profile.location && (
               <span className="inline-flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-slate-400" />
-                {profile.location}
+                <MapPin className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                <span className="truncate max-w-[180px]">{profile.location}</span>
               </span>
             )}
 
@@ -163,20 +163,20 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-1.5 hover:text-brand-600 truncate max-w-xs transition"
               >
-                <Globe className="w-3.5 h-3.5 text-slate-400" />
-                {profile.blog.replace(/^https?:\/\//, '')}
+                <Globe className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                <span>{profile.blog.replace(/^https?:\/\//, '')}</span>
               </a>
             )}
 
             <span className="inline-flex items-center gap-1.5">
-              <Calendar className="w-3.5 h-3.5 text-slate-400" />
+              <Calendar className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
               Member since {formattedJoinDate}
             </span>
           </div>
 
           {/* Numerical Analytics Highlights */}
           <div className="grid grid-cols-3 gap-3 pt-2">
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-center hover:bg-slate-100/50 transition">
               <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block flex items-center justify-center gap-1">
                 <BookOpen className="w-3 h-3 text-slate-400" />
                 Public Repos
@@ -186,7 +186,7 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-center hover:bg-slate-100/50 transition">
               <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block flex items-center justify-center gap-1">
                 <Users className="w-3 h-3 text-slate-400" />
                 Followers
@@ -196,7 +196,7 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
               </span>
             </div>
 
-            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200 text-center">
+            <div className="p-3 rounded-xl bg-slate-50 border border-slate-200/80 text-center hover:bg-slate-100/50 transition">
               <span className="text-[11px] font-semibold text-slate-500 uppercase tracking-wider block flex items-center justify-center gap-1">
                 <UserCheck className="w-3 h-3 text-slate-400" />
                 Following
@@ -213,4 +213,3 @@ export const GitHubProfileCard: React.FC<GitHubProfileCardProps> = ({
 };
 
 export default GitHubProfileCard;
-

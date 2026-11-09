@@ -1,12 +1,25 @@
-import React from 'react';
-import { User, Github, LogOut } from 'lucide-react';
+import React, { useState } from 'react';
+import { User, Github, LogOut, Unlink } from 'lucide-react';
 import { useAuth } from '../context/AuthContext.tsx';
 import Card from '../components/common/Card.tsx';
 import Button from '../components/common/Button.tsx';
 import Badge from '../components/common/Badge.tsx';
+import ConfirmModal from '../components/common/ConfirmModal.tsx';
 
 export const SettingsPage: React.FC = () => {
   const { user, githubStatus, logout, disconnectGitHub } = useAuth();
+  const [isDisconnectModalOpen, setIsDisconnectModalOpen] = useState(false);
+  const [disconnecting, setDisconnecting] = useState(false);
+
+  const handleConfirmDisconnect = async () => {
+    try {
+      setDisconnecting(true);
+      await disconnectGitHub();
+      setIsDisconnectModalOpen(false);
+    } finally {
+      setDisconnecting(false);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -77,7 +90,12 @@ export const SettingsPage: React.FC = () => {
 
             {githubStatus?.connected && (
               <div className="pt-2">
-                <Button variant="danger" size="sm" onClick={disconnectGitHub}>
+                <Button
+                  variant="danger"
+                  size="sm"
+                  leftIcon={<Unlink className="w-3.5 h-3.5" />}
+                  onClick={() => setIsDisconnectModalOpen(true)}
+                >
                   Disconnect GitHub Account
                 </Button>
               </div>
@@ -85,6 +103,19 @@ export const SettingsPage: React.FC = () => {
           </div>
         </Card>
       </div>
+
+      {/* Disconnect Confirmation Modal */}
+      <ConfirmModal
+        isOpen={isDisconnectModalOpen}
+        title="Disconnect GitHub Account?"
+        message="Are you sure you want to disconnect your GitHub account? This will securely purge your encrypted access token, purge cached developer analytics, and revoke platform access to your GitHub statistics."
+        confirmLabel="Yes, Disconnect"
+        cancelLabel="Keep Connected"
+        variant="danger"
+        isLoading={disconnecting}
+        onConfirm={handleConfirmDisconnect}
+        onCancel={() => setIsDisconnectModalOpen(false)}
+      />
     </div>
   );
 };

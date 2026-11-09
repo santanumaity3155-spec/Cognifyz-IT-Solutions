@@ -36,13 +36,13 @@ export const RepoCard: React.FC<RepoCardProps> = ({
 
   return (
     <div
-      className={`bg-white rounded-2xl border border-slate-200 p-5 shadow-xs hover:shadow-md transition-all duration-200 flex flex-col justify-between ${className}`}
+      className={`bg-white rounded-2xl border border-slate-200/90 p-5 shadow-xs hover:shadow-md hover:border-slate-300 transition-all duration-200 flex flex-col justify-between ${className}`}
     >
       <div className="space-y-3">
         {/* Header: Name, Visibility Pill, and External Link */}
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-2.5 min-w-0">
-            <div className="w-8 h-8 rounded-lg bg-indigo-50 text-brand-600 flex items-center justify-center flex-shrink-0 mt-0.5">
+            <div className="w-8 h-8 rounded-xl bg-indigo-50 text-brand-600 flex items-center justify-center flex-shrink-0 mt-0.5">
               <BookMarked className="w-4 h-4" />
             </div>
             <div className="min-w-0">
@@ -68,7 +68,7 @@ export const RepoCard: React.FC<RepoCardProps> = ({
         </div>
 
         {/* Description */}
-        <p className="text-xs sm:text-sm text-slate-600 line-clamp-2 min-h-[2.5rem] leading-relaxed">
+        <p className="text-xs sm:text-sm text-slate-600 line-clamp-2 min-h-[2.5rem] leading-relaxed break-words">
           {repo.description || (
             <span className="italic text-slate-400">No repository description provided.</span>
           )}
@@ -104,24 +104,24 @@ export const RepoCard: React.FC<RepoCardProps> = ({
                 className="w-2.5 h-2.5 rounded-full flex-shrink-0"
                 style={{ backgroundColor: getLanguageColor(repo.language) }}
               />
-              <span>{repo.language}</span>
+              <span className="truncate max-w-[100px]">{repo.language}</span>
             </div>
           ) : (
             <span className="text-slate-400">Markdown / Assets</span>
           )}
 
           <div className="inline-flex items-center gap-1" title={`${repo.starsCount} stargazers`}>
-            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400" />
+            <Star className="w-3.5 h-3.5 text-amber-500 fill-amber-400 flex-shrink-0" />
             <span className="font-mono text-slate-700">{repo.starsCount}</span>
           </div>
 
           <div className="inline-flex items-center gap-1" title={`${repo.forksCount} forks`}>
-            <GitFork className="w-3.5 h-3.5 text-slate-400" />
+            <GitFork className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
             <span className="font-mono text-slate-700">{repo.forksCount}</span>
           </div>
 
           <div className="inline-flex items-center gap-1" title={`${repo.openIssuesCount} open issues`}>
-            <CircleDot className="w-3.5 h-3.5 text-slate-400" />
+            <CircleDot className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
             <span className="font-mono text-slate-700">{repo.openIssuesCount}</span>
           </div>
 
@@ -134,13 +134,13 @@ export const RepoCard: React.FC<RepoCardProps> = ({
         </div>
 
         {/* Date and Action Controls */}
-        <div className="flex items-center justify-between pt-1">
-          <span className="text-[11px] text-slate-400 inline-flex items-center gap-1">
-            <Calendar className="w-3 h-3 text-slate-400" />
+        <div className="flex items-center justify-between pt-1 gap-2">
+          <span className="text-[11px] text-slate-400 inline-flex items-center gap-1 truncate">
+            <Calendar className="w-3 h-3 text-slate-400 flex-shrink-0" />
             {formattedUpdateDate}
           </span>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 flex-shrink-0">
             {onViewDetails && (
               <Button
                 variant="outline"
@@ -156,8 +156,9 @@ export const RepoCard: React.FC<RepoCardProps> = ({
               href={repo.htmlUrl}
               target="_blank"
               rel="noopener noreferrer"
-              className="inline-flex items-center justify-center p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-brand-600 hover:border-slate-300 hover:bg-slate-50 transition"
+              className="inline-flex items-center justify-center p-1.5 rounded-lg border border-slate-200 text-slate-600 hover:text-brand-600 hover:border-slate-300 hover:bg-slate-50 transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
               title="Open repository on GitHub"
+              aria-label={`Open repository ${repo.name} on GitHub`}
             >
               <ExternalLink className="w-4 h-4" />
             </a>
@@ -169,4 +170,3 @@ export const RepoCard: React.FC<RepoCardProps> = ({
 };
 
 export default RepoCard;
-

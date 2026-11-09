@@ -21,7 +21,7 @@ export const Button: React.FC<ButtonProps> = ({
   ...props
 }) => {
   const baseClasses =
-    'inline-flex items-center justify-center font-medium rounded-lg transition-all focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed select-none';
+    'inline-flex items-center justify-center font-medium rounded-lg transition-all duration-150 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer select-none';
 
   const sizeClasses = {
     sm: 'px-3 py-1.5 text-xs gap-1.5',
@@ -30,11 +30,11 @@ export const Button: React.FC<ButtonProps> = ({
   };
 
   const variantClasses = {
-    primary: 'bg-brand-600 text-white hover:bg-brand-700 focus:ring-brand-500 shadow-sm shadow-brand-500/20 active:bg-brand-800',
-    secondary: 'bg-slate-100 text-slate-800 hover:bg-slate-200 focus:ring-slate-400 active:bg-slate-300',
-    danger: 'bg-rose-600 text-white hover:bg-rose-700 focus:ring-rose-500 shadow-sm shadow-rose-500/20 active:bg-rose-800',
-    outline: 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus:ring-brand-500',
-    ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 focus:ring-slate-400',
+    primary: 'bg-brand-600 text-white hover:bg-brand-700 focus-visible:ring-brand-500 shadow-sm shadow-brand-500/20 active:bg-brand-800',
+    secondary: 'bg-slate-100 text-slate-800 hover:bg-slate-200 focus-visible:ring-slate-400 active:bg-slate-300',
+    danger: 'bg-rose-600 text-white hover:bg-rose-700 focus-visible:ring-rose-500 shadow-sm shadow-rose-500/20 active:bg-rose-800',
+    outline: 'border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 focus-visible:ring-brand-500 active:bg-slate-100',
+    ghost: 'bg-transparent text-slate-600 hover:bg-slate-100 focus-visible:ring-slate-400 active:bg-slate-200',
   };
 
   return (
@@ -43,7 +43,7 @@ export const Button: React.FC<ButtonProps> = ({
       className={`${baseClasses} ${sizeClasses[size]} ${variantClasses[variant]} ${className}`}
       {...props}
     >
-      {isLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : leftIcon}
+      {isLoading ? <Loader2 className="w-4 h-4 animate-spin flex-shrink-0" /> : leftIcon}
       {children}
       {!isLoading && rightIcon}
     </button>
@@ -51,4 +51,3 @@ export const Button: React.FC<ButtonProps> = ({
 };
 
 export default Button;
-
